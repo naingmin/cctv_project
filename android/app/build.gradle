@@ -1,0 +1,115 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+// Release signing credentials, kept out of version control. A release build
+// without them is refused (see the taskGraph check below): silently signing
+// with the debug key produces an APK that can never be updated by a properly
+// signed one, which is only discovered after it has been installed.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+// Plain http:// in release builds sends passwords and tokens unencrypted.
+// Off by default; set cctv.allowHttpInRelease=true in android/gradle.properties
+// only for internal testing against a LAN server without HTTPS.
+def allowHttpInRelease = (findProperty('cctv.allowHttpInRelease') ?: 'false').toBoolean()
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+android {
+    namespace "com.cctvmanager.app"
+    compileSdk 35
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId "com.cctvmanager.app"
+        minSdk 21
+        // Google Play requires apps to target Android 15 (API 35).
+        targetSdk 35
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        // Development builds talk to LAN servers over plain http.
+        // `+=`, not `=`: the Flutter plugin supplies other placeholders
+        // (e.g. applicationName) that must be kept.
+        manifestPlaceholders += [usesCleartextTraffic: "true"]
+    }
+
+    signingConfigs {
+        release {
+            if (hasReleaseKeystore) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                // Resolved relative to android/app/, which is where
+                // `storeFile` in key.properties is written to point.
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig hasReleaseKeystore ? signingConfigs.release : null
+            manifestPlaceholders += [usesCleartextTraffic: allowHttpInRelease.toString()]
+            minifyEnabled true
+            // Property, not a method, in AGP 8.
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+// Fail fast, with instructions, instead of producing an unsigned or
+// debug-signed release. Debug and profile builds are unaffected.
+gradle.taskGraph.whenReady { graph ->
+    def buildsRelease = graph.allTasks.any { task ->
+        task.project == project && task.name.toLowerCase().contains('release')
+    }
+    if (buildsRelease && !hasReleaseKeystore) {
+        throw new GradleException(
+            "Release signing key not found: android/key.properties is missing.\n" +
+            "Restore key.properties and the .jks keystore from your secure backup.\n" +
+            "Never sign a release with a different key: installed apps could " +
+            "no longer be updated."
+        )
+    }
+}

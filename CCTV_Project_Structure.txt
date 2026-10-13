@@ -1,0 +1,206 @@
+CCTV Manager Flutter Project - Structure Documentation
+======================================================
+
+Project Overview
+----------------
+A Flutter mobile application for CCTV camera management with features including:
+- CCTV record creation and management
+- Image upload to MinIO storage
+- Map integration with markers
+- User authentication
+- MongoDB database integration
+
+================================================================================
+
+📁 Root Directory
+--------------------------------------------------------------------------------
+- lib/ - Main Flutter application code
+- backend/ - FastAPI backend application
+- infrastructure/ - Docker Compose configuration
+- .env - Environment variables (critical for configuration)
+- pubspec.yaml - Flutter dependencies
+
+================================================================================
+
+📁 Flutter Frontend (lib/)
+--------------------------------------------------------------------------------
+lib/core/ - Core utilities and shared widgets
+  - core/theme/ - App theming and design constants
+  - core/utils/ - Helper functions and constants
+
+lib/data/ - Data layer (models, services, repositories)
+  - data/models/ - Dart model classes with JSON serialization
+    - cctv_record_model.dart - CCTV record data model (@JsonSerializable)
+    - cctv_image_model.dart - Image model with serialization
+    - user_model.dart - User authentication model
+    - *.g.dart - Generated files from build_runner
+
+  - data/services/ - Backend service implementations
+    - cctv_service.dart - CCTV business logic
+    - storage_service.dart - MinIO object storage operations
+    - location_service.dart - GPS/location utilities
+    - user_service.dart - Authentication management
+    - upload_queue_service.dart - Background image upload queue
+
+lib/features/ - Feature modules (modular architecture)
+  - lib/features/cctv/ - CCTV management module
+    - providers/ - Riverpod state management
+      - cctv_form_provider.dart - Form state management
+      - cctv_detail_provider.dart - Detail screen state
+      - cctv_list_provider.dart - List/camera list management
+
+    - screens/ - UI screens
+      - add_cctv_screen.dart - Add new CCTV camera
+      - edit_cctv_screen.dart - Edit existing CCTV
+      - cctv_detail_screen.dart - CCTV detail view
+      - cctv_list_screen.dart - Camera list view
+      - live_stream_screen.dart - Live video streaming
+
+    - widgets/ - Reusable UI components
+      - cctv_card.dart - CCTV card widget
+      - filter_sheet.dart - Filter options sheet
+
+  - lib/features/map/ - Map module
+    - providers/ - State management
+      - map_provider.dart - Map state and marker management
+
+    - screens/ - Map screens
+      - map_screen.dart - Main map interface with markers
+      - map_location_picker_screen.dart - Location picker
+
+  - lib/features/auth/ - Authentication module
+  - lib/features/users/ - User management
+  - lib/features/dashboard/ - Dashboard screen
+  - lib/features/settings/ - Settings page
+
+================================================================================
+
+🔄 Data Flow Architecture
+--------------------------------------------------------------------------------
+1. CCTV Record Lifecycle:
+   Flutter UI → Riverpod Provider → Backend API → MongoDB → Flutter UI
+                                   ↑              ↓
+                              Presigned URLs ← MinIO Storage
+
+2. Image Upload Flow:
+   Flutter Camera/Picker → Riverpod Form State → POST /api/v1/uploads/presign
+   → Backend generates signed URL → Flutter uploads directly to MinIO
+   → POST /cctvs/{id}/images/complete → Backend validates & stores metadata
+
+   Key: Presigned URLs must contain http://localhost:9000 for browser access
+   (outside Docker) or http://minio:9000 (inside Docker).
+
+3. CCTV Detail Flow:
+   Flutter UI → Riverpod cctv_detail_provider → GET /api/cctvs/{id}
+   → MongoDB → Flutter detail screen with direction, images, metadata
+
+================================================================================
+
+🛠️ Key Configuration Points
+--------------------------------------------------------------------------------
+Environment Variables (backend/.env):
+- MINIO_ENDPOINT=http://localhost:9000          # Backend connects here
+- MINIO_PUBLIC_ENDPOINT=http://localhost:9000   # Clients/browsers use this
+- MINIO_ACCESS_KEY=minioadmin
+- MINIO_SECRET_KEY=minioadmin
+- MINIO_BUCKET=cctv-media
+- MONGODB_URI=mongodb://localhost:27017
+- MONGODB_DATABASE=cctv_manager
+- ENVIRONMENT=development
+- DEBUG=true
+- JWT_SECRET_KEY=change-me-in-production
+- CORS_ORIGINS=[http://localhost:3000]
+
+Docker Compose (infrastructure/docker-compose.yml):
+- Backend: FastAPI + uvicorn on port 8000
+- MinIO/RustFS: On port 9000 (external: 9000→9000)
+- MongoDB: On port 27017
+- Variables passed via ${VAR:-default} patterns
+
+Flutter Config (lib/main.dart):
+- Material Design setup
+- Riverpod provider scope
+- CORS configuration for API calls
+
+================================================================================
+
+🛠️ Development Workflow
+--------------------------------------------------------------------------------
+1. Local Development:
+   cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000
+   cd lib && flutter run -d chrome --web-port 3000
+
+2. Docker Development:
+   cd infrastructure && docker compose up -d
+
+3. Build APK:
+   flutter build apk --release
+   Output: build/app/outputs/flutter-apk/app-release.apk
+
+================================================================================
+
+📝 Important Notes for New Developers
+--------------------------------------------------------------------------------
+1. MinIO Image Upload Critical Point:
+   The storage_service.py has TWO clients:
+   - _get_client() → MINIO_ENDPOINT (http://minio:9000 in Docker)
+     - for actual S3 operations
+   - _get_presign_client() → MINIO_PUBLIC_ENDPOINT
+     - for signed URL generation
+
+   URLs must be client-reachable:
+   - Inside Docker = http://minio:9000
+   - Outside Docker = http://localhost:9000
+
+2. Direction Feature:
+   - Backend schema: direction field with pattern N|NE|E|SE|S|SW|W|NW
+   - Flutter form: DropdownButtonFormField with 8 options
+   - Map markers: Direction-based icons (being fixed)
+   - Detail screen: Displays direction in information section
+
+3. State Management:
+   - Riverpod used throughout
+   - Form state in cctv_form_provider.dart
+   - List management in cctv_list_provider.dart
+   - Map state in map_provider.dart
+
+4. JSON Serialization:
+   - Models use @JsonSerializable() from json_annotation
+   - Generated .g.dart files via flutter pub run build_runner build
+
+5. Recent Fixes Applied:
+   - Fixed compass/arrow icon names in map_screen.dart
+   - Fixed model direction field compilation errors
+   - Fixed form provider direction field initialization
+   - Fixed MinIO public endpoint for presigned URLs
+   - Built APK without direction features (feature can be re-enabled later)
+
+================================================================================
+
+Quick Start for New Developer
+----------------------------
+1. Clone/repo and install
+   flutter pub get          # In lib/
+   cd backend && pip install -r requirements.txt  # In backend/
+
+2. Configure environment
+   copy backend\.env.example backend\.env
+   # Edit .env with your local settings
+
+3. Start services
+   Option A: Local (backend + MinIO emulation)
+     cd backend && uvicorn app.main:app --port 8000
+
+   Option B: Docker
+     cd infrastructure && docker compose up -d
+
+4. Run Flutter
+   cd lib && flutter run
+
+5. Test features
+   - Add CCTV with images
+   - Verify map markers appear
+   - Check detail screens display correctly
+
+================================================================================
+End of Documentation

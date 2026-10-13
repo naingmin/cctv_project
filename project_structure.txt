@@ -1,0 +1,349 @@
+Project Structure
+============================================================
+
+Project/
+  .env (189 B)
+  .env.example (397 B)
+  .flutter-plugins (3.3 KB)
+  .flutter-plugins-dependencies (9.0 KB)
+  .gitignore (599 B)
+  CCTV_Project_Structure.txt (7.6 KB)
+  README.md (3.7 KB)
+  analysis_options.yaml (357 B)
+  change_admin_password.bat (493 B)
+  fix_direction.py (590 B)
+  fix_model.py (960 B)
+  fix_provider.py (3.8 KB)
+  fix_provider2.py (1.3 KB)
+  fix_provider3.py (576 B)
+  fix_provider4.py (829 B)
+  logo.png (1021.8 KB)
+  project_structure.txt (4.6 MB)
+  pubspec.lock (34.1 KB)
+  pubspec.yaml (1.5 KB)
+  python_script.py (39.3 KB)
+  query (9 B)
+  queryex (9 B)
+  android/
+    build.gradle (322 B)
+    gradle.properties (536 B)
+    gradlew (4.9 KB)
+    gradlew.bat (2.3 KB)
+    key.properties (572 B)
+    local.properties (173 B)
+    settings.gradle (727 B)
+    app/
+      build.gradle (4.0 KB)
+      cctv-release.jks (2.2 KB)
+      proguard-rules.pro (1.7 KB)
+      src/
+        debug/
+          AndroidManifest.xml (148 B)
+        main/
+          AndroidManifest.xml (1.8 KB)
+          java/
+            io/
+              flutter/
+                plugins/
+                  GeneratedPluginRegistrant.java (2.3 KB)
+          kotlin/
+            com/
+              cctvmanager/
+                app/
+                  MainActivity.kt (121 B)
+          res/
+            drawable/
+              launch_background.xml (178 B)
+            mipmap-hdpi/
+              ic_launcher.png (1021.8 KB)
+            mipmap-mdpi/
+              ic_launcher.png (1021.8 KB)
+            mipmap-xhdpi/
+              ic_launcher.png (1021.8 KB)
+            mipmap-xxhdpi/
+              ic_launcher.png (1021.8 KB)
+            mipmap-xxxhdpi/
+              ic_launcher.png (1021.8 KB)
+            values/
+              strings.xml (114 B)
+              styles.xml (405 B)
+            values-night/
+              styles.xml (405 B)
+        profile/
+          AndroidManifest.xml (148 B)
+    gradle/
+      wrapper/
+        gradle-wrapper.jar (52.4 KB)
+        gradle-wrapper.properties (186 B)
+  assets/
+    fonts/
+      LICENSE-roboto.txt (11.1 KB)
+      roboto-bold.ttf (166.8 KB)
+      roboto-medium.ttf (168.0 KB)
+      roboto-regular.ttf (167.7 KB)
+    icons/
+    images/
+      logo.png (1021.8 KB)
+  backend/
+     .env (323 B)
+    .dockerignore (264 B)
+    .env (77 B)
+    .env.example (2.1 KB)
+    Dockerfile (359 B)
+    pytest.ini (113 B)
+    requirements-dev.txt (45 B)
+    requirements.txt (219 B)
+    .pytest_cache/
+      .gitignore (39 B)
+      CACHEDIR.TAG (191 B)
+      README.md (310 B)
+      v/
+        cache/
+          lastfailed (431 B)
+          nodeids (8.4 KB)
+          stepwise (2 B)
+    app/
+      __init__.py (22 B)
+      bootstrap.py (1.0 KB)
+      config.py (7.4 KB)
+      main.py (2.0 KB)
+      api/
+        __init__.py (22 B)
+        deps.py (10.4 KB)
+        v1/
+          __init__.py (22 B)
+          audit.py (3.3 KB)
+          auth.py (6.4 KB)
+          cctv.py (9.0 KB)
+          router.py (347 B)
+          uploads.py (7.6 KB)
+          users.py (5.2 KB)
+      core/
+        __init__.py (22 B)
+        errors.py (3.7 KB)
+        logging.py (793 B)
+        rate_limit.py (2.4 KB)
+        rbac.py (4.4 KB)
+        security.py (9.9 KB)
+      db/
+        __init__.py (22 B)
+        mongo.py (4.2 KB)
+      schemas/
+        __init__.py (22 B)
+        audit.py (428 B)
+        auth.py (1.3 KB)
+        cctv.py (6.6 KB)
+        common.py (415 B)
+        upload.py (1.6 KB)
+        user.py (2.1 KB)
+      services/
+        __init__.py (22 B)
+        audit_service.py (3.5 KB)
+        cctv_service.py (21.7 KB)
+        storage_service.py (7.3 KB)
+        token_service.py (3.1 KB)
+        user_service.py (14.6 KB)
+      utils/
+    scripts/
+      set_password.py (1.5 KB)
+    tests/
+      __init__.py (22 B)
+      conftest.py (2.3 KB)
+      test_access_control.py (16.8 KB)
+      test_auth.py (5.0 KB)
+      test_cctv.py (13.3 KB)
+      test_config_security.py (2.2 KB)
+      test_rbac.py (5.1 KB)
+      test_storage.py (14.7 KB)
+      test_users_audit.py (3.6 KB)
+  docs/
+    api.md (5.5 KB)
+    architecture.md (2.2 KB)
+    authentication.md (1.9 KB)
+    deployment.md (3.1 KB)
+    map.md (1.8 KB)
+    minio.md (5.4 KB)
+    mongodb.md (2.3 KB)
+    security.md (5.5 KB)
+  infrastructure/
+    .env (358 B)
+    .env.example (201 B)
+    docker-compose.yml (4.3 KB)
+  ios/
+    Flutter/
+      AppFrameworkInfo.plist (774 B)
+      Debug.xcconfig (30 B)
+      Generated.xcconfig (502 B)
+      Release.xcconfig (30 B)
+      flutter_export_environment.sh (532 B)
+    Runner/
+      AppDelegate.swift (404 B)
+      GeneratedPluginRegistrant.h (378 B)
+      GeneratedPluginRegistrant.m (1.7 KB)
+      Info.plist (1.8 KB)
+      Base.lproj/
+        LaunchScreen.storyboard (1.6 KB)
+        Main.storyboard (1.6 KB)
+    Runner.xcodeproj/
+      project.pbxproj (60.2 KB)
+    Runner.xcworkspace/
+      contents.xcworkspacedata (135 B)
+  lib/
+    main.dart (2.5 KB)
+    core/
+      config/
+        app_config.dart (4.5 KB)
+      constants/
+        app_constants.dart (1.6 KB)
+      errors/
+        api_exception.dart (3.3 KB)
+      network/
+        api_client.dart (6.9 KB)
+      routing/
+        app_router.dart (5.8 KB)
+      storage/
+        prefs_token_store.dart (1.3 KB)
+        secure_storage.dart (378 B)
+        server_config_store.dart (1.8 KB)
+      theme/
+        app_colors.dart (2.4 KB)
+        app_theme.dart (6.3 KB)
+      utils/
+        app_utils.dart (2.4 KB)
+        image_mime.dart (770 B)
+        local_image_store.dart (1.4 KB)
+        picked_image.dart (1.2 KB)
+        role_permissions.dart (3.4 KB)
+        validators.dart (5.4 KB)
+    data/
+      models/
+        cctv_image_model.dart (1.6 KB)
+        cctv_image_model.g.dart (1.2 KB)
+        cctv_record_model.dart (5.3 KB)
+        cctv_record_model.g.dart (2.2 KB)
+        dashboard_stats.dart (1.2 KB)
+        dashboard_stats.g.dart (1.3 KB)
+        map_bounds.dart (853 B)
+        map_bounds.g.dart (807 B)
+        paginated_response.dart (1.1 KB)
+        user_model.dart (2.7 KB)
+        user_model.g.dart (1.5 KB)
+      services/
+        auth_service.dart (2.1 KB)
+        cctv_service.dart (7.9 KB)
+        dashboard_service.dart (572 B)
+        location_service.dart (1.2 KB)
+        upload_queue_service.dart (3.6 KB)
+        user_service.dart (3.5 KB)
+    features/
+      auth/
+        providers/
+          auth_provider.dart (4.5 KB)
+        screens/
+          login_screen.dart (14.8 KB)
+      cctv/
+        providers/
+          cctv_detail_provider.dart (2.4 KB)
+          cctv_form_provider.dart (13.0 KB)
+          cctv_list_provider.dart (10.2 KB)
+          image_upload_provider.dart (4.3 KB)
+        screens/
+          add_cctv_screen.dart (23.2 KB)
+          cctv_detail_screen.dart (18.5 KB)
+          cctv_list_screen.dart (7.7 KB)
+          edit_cctv_screen.dart (15.0 KB)
+          live_stream_screen.dart (2.2 KB)
+        widgets/
+          cctv_card.dart (3.9 KB)
+          filter_sheet.dart (5.2 KB)
+      dashboard/
+        providers/
+          dashboard_provider.dart (2.4 KB)
+        screens/
+          dashboard_screen.dart (5.2 KB)
+        widgets/
+          recent_uploads_card.dart (3.5 KB)
+          stat_card.dart (1.8 KB)
+      map/
+        providers/
+          map_provider.dart (3.0 KB)
+        screens/
+          map_location_picker_screen.dart (5.0 KB)
+          map_screen.dart (9.5 KB)
+          map_screen.txt (14.0 KB)
+          map_screen_backup.dart (6.7 KB)
+      settings/
+        providers/
+          settings_provider.dart (1.3 KB)
+        screens/
+          settings_screen.dart (7.1 KB)
+      users/
+        providers/
+          add_user_provider.dart (2.5 KB)
+          user_management_provider.dart (3.6 KB)
+        screens/
+          add_user_screen.dart (10.5 KB)
+          user_management_screen.dart (9.2 KB)
+        widgets/
+          area_fields.dart (6.2 KB)
+          edit_access_dialog.dart (3.4 KB)
+    shared/
+      widgets/
+        app_scaffold.dart (5.4 KB)
+        empty_state.dart (1.5 KB)
+        error_view.dart (1.3 KB)
+        image_gallery.dart (7.1 KB)
+        loading_view.dart (1.7 KB)
+        location_card.dart (3.6 KB)
+        primary_button.dart (1.4 KB)
+        record_image.dart (2.2 KB)
+        resilient_image.dart (3.0 KB)
+        search_field.dart (2.3 KB)
+        secondary_button.dart (1.2 KB)
+        status_badge.dart (2.0 KB)
+        user_role_badge.dart (1.3 KB)
+  linux/
+    flutter/
+      generated_plugin_registrant.cc (789 B)
+      generated_plugin_registrant.h (303 B)
+      generated_plugins.cmake (792 B)
+      ephemeral/
+        .plugin_symlinks/
+  macos/
+    Flutter/
+      GeneratedPluginRegistrant.swift (861 B)
+      ephemeral/
+        Flutter-Generated.xcconfig (395 B)
+        flutter_export_environment.sh (494 B)
+  server/
+    Caddyfile (804 B)
+    LICENSE (11.1 KB)
+    README.md (12.4 KB)
+    caddy.exe (50.7 MB)
+    install_task.ps1 (1.1 KB)
+    prep_network.ps1 (2.7 KB)
+    start_backend.bat (872 B)
+    logs/
+      backend.log (372 B)
+      install.log (1.1 KB)
+      network_prep.log (1.1 KB)
+  test/
+    api_client_refresh_test.dart (4.5 KB)
+    app_config_test.dart (2.2 KB)
+    app_router_test.dart (4.7 KB)
+    cctv_detail_screen_test.dart (2.6 KB)
+    cctv_list_screen_test.dart (6.5 KB)
+    cctv_list_state_test.dart (1.2 KB)
+    cctv_model_test.dart (8.1 KB)
+    dashboard_service_test.dart (1.9 KB)
+    map_provider_test.dart (3.2 KB)
+    picked_image_test.dart (1.5 KB)
+    role_permissions_test.dart (2.7 KB)
+    user_model_test.dart (2.4 KB)
+    validators_test.dart (6.4 KB)
+    helpers/
+      fake_data.dart (1.2 KB)
+  web/
+    index.html (696 B)
+    manifest.json (600 B)
+  windows/

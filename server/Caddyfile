@@ -1,0 +1,28 @@
+# ============================================================
+#  Caddy reverse proxy - CCTV system
+#
+#  Caddy obtains and renews the HTTPS certificates automatically
+#  as long as the DNS records below point at this office and
+#  ports 80 + 443 are forwarded to this PC by the router.
+#
+#  The __DOMAIN__ tokens are placeholders: they are replaced
+#  with the real domain when the DNS records are created.
+# ============================================================
+
+{
+	admin off
+	log default {
+		output file C:/Users/user/Desktop/Project/server/logs/caddy.log
+	}
+}
+
+# API + Flutter web app  ->  backend on this PC
+__API_DOMAIN__ {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}
+
+# Image storage (presigned upload/download URLs)  ->  MinIO on this PC
+__MEDIA_DOMAIN__ {
+	reverse_proxy 127.0.0.1:9000
+}

@@ -1,0 +1,17 @@
+# Secrets: pass configuration as environment variables at runtime instead.
+.env
+*.env
+!.env.example
+
+# Local virtualenvs and caches
+.venv/
+alprs/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Not needed at runtime
+tests/
+pytest.ini
+requirements-dev.txt

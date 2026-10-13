@@ -1,0 +1,32 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261007160444
+Username: MSI\user
+RunAs User: MSI\user
+Configuration Name: 
+Machine: MSI (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\user\Desktop\Project\server\install_task.ps1
+Process ID: 3512
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+SUCCESS: The scheduled task "CCTV Backend" has successfully been created.
+SUCCESS: Attempted to run the scheduled task "CCTV Backend".
+HEALTH: {"status":"ok","environment":"development"}
+
+Folder: \
+HostName:      MSI
+TaskName:      \CCTV Backend
+Next Run Time: N/A
+Status:        Ready
+Logon Mode:    Interactive/Background
+**********************
+Windows PowerShell transcript end
+End time: 20261007160458
+**********************

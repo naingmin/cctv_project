@@ -1,0 +1,33 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261007161928
+Username: MSI\user
+RunAs User: MSI\user
+Configuration Name: 
+Machine: MSI (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\user\Desktop\Project\server\prep_network.ps1
+Process ID: 31336
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+interface : Wi-Fi (index 8)
+address   : 192.168.100.51/24  gateway 192.168.100.1  dns 10.10.10.10, 10.10.10.11
+netmask   : 255.255.255.0
+setting static address...
+
+
+
+address now: 192.168.100.51
+firewall rule exists: 8000
+firewall rule exists: 9000
+backend still healthy: {"status":"ok","environment":"development"}
+**********************
+Windows PowerShell transcript end
+End time: 20261007161937
+**********************
