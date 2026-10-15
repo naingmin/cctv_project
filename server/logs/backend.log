@@ -196,3 +196,28 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 2026-10-15T11:19:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=9c020f0e-7b83-4b3d-a99b-8c9ea28e179a
 2026-10-15T11:20:21+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=76b70de0-af97-481b-9d2b-0ad347d9f13b
 2026-10-15T11:20:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=d52aa655-ec2e-4043-8618-8aaa3bcfe370
+<<<<<<< HEAD
+=======
+2026-10-15T11:20:51+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=0f835751-baf7-4213-a4cc-ee1586ae3e75
+2026-10-15T11:20:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=18d552d5-ca97-42d0-b0e3-f64b89fcbe48
+2026-10-15T11:21:21+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=674a194a-9e82-4e4e-bd08-b4b8e2f13dfe
+2026-10-15T11:21:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=d3a3adf5-7147-48d9-9a9e-533824e2b8b8
+2026-10-15T11:21:51+0630 | INFO     | app.main | GET /health -> 200 (1.0ms) rid=4c6002e3-5138-4a58-9eff-c0a5b9a68add
+2026-10-15T11:21:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=65610675-6b10-48a8-a17f-21b7e8858617
+2026-10-15T11:22:21+0630 | INFO     | app.main | GET /health -> 200 (1.4ms) rid=662cbf42-2ca9-485b-9360-33b4c2bb4518
+2026-10-15T11:22:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=8464d4da-048f-408e-9241-f1a89fff409d
+2026-10-15T11:22:51+0630 | INFO     | app.main | GET /health -> 200 (0.5ms) rid=594ca59c-513c-49bf-86ca-d1bcc8623470
+2026-10-15T11:22:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=512132b6-3897-4891-9fb0-2f8a5e0bec08
+2026-10-15T11:23:21+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=e85d04c2-39bf-4d76-9496-43d453e224ff
+2026-10-15T11:23:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=ebe941dd-10ab-43bb-8153-e7ad89a9e07e
+2026-10-15T11:23:51+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=71c8b0c3-2e80-4647-a938-454a76bfbe0d
+2026-10-15T11:23:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=9a0796c6-29d7-4b66-9794-10454be6223a
+2026-10-15T11:24:21+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=b79c54c9-05a7-469f-b3d6-bd54a18ec9c2
+2026-10-15T11:24:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=881f2798-0f63-4acf-acc7-049e4e2e300b
+2026-10-15T11:24:51+0630 | INFO     | app.main | GET /health -> 200 (1.0ms) rid=3c34582f-9d5e-4449-8a2e-87012b7685cb
+2026-10-15T11:24:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=f4418f3d-3ba6-47fb-ac8d-c866f831531c
+2026-10-15T11:25:21+0630 | INFO     | app.main | GET /health -> 200 (0.5ms) rid=c78b548c-0fdf-45a8-908a-71ca0e5d1ab9
+2026-10-15T11:25:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=7902b5c9-146c-4843-8e1b-f3d19295ab88
+2026-10-15T11:25:51+0630 | INFO     | app.main | GET /health -> 200 (0.4ms) rid=2e87415a-3c2b-455a-875c-fe1d9988c793
+2026-10-15T11:25:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=4217a56c-3694-4cbe-99f6-7c17225dccde
+>>>>>>> 75fbfd5 (Initial commit for CCTV project with proper gitignore setup)
