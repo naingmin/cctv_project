@@ -12,6 +12,8 @@ def _secure(**overrides):
         ENVIRONMENT="production",
         DEBUG=False,
         JWT_SECRET_KEY=secrets.token_urlsafe(64),
+        MONGODB_USERNAME="cctv-" + secrets.token_hex(6),
+        MONGODB_PASSWORD=secrets.token_urlsafe(32),
         MINIO_ACCESS_KEY="cctv-" + secrets.token_hex(6),
         MINIO_SECRET_KEY=secrets.token_urlsafe(32),
         DEFAULT_ADMIN_PASSWORD="S0me-unique-passphrase",
@@ -62,6 +64,45 @@ def test_minio_endpoint_property_uses_backend_endpoint():
     )
 
     assert settings.minio_endpoint == "http://minio:9000"
+
+
+def test_mongodb_uri_is_built_from_credentials_and_components():
+    settings = Settings(
+        _env_file=None,
+        MONGODB_HOST="db.example",
+        MONGODB_PORT=27018,
+        MONGODB_USERNAME="cctv user",
+        MONGODB_PASSWORD="p@ss:/",
+        MONGODB_AUTH_SOURCE="admin",
+        MONGODB_DATABASE="records",
+    )
+
+    assert settings.mongodb_uri == (
+        "mongodb://cctv+user:p%40ss%3A%2F@db.example:27018/"
+        "records?authSource=admin"
+    )
+
+
+def test_mongodb_uri_override_takes_precedence():
+    settings = Settings(
+        _env_file=None,
+        MONGODB_URI="mongodb://external.example:27017/cctv",
+        MONGODB_HOST="ignored",
+    )
+
+    assert settings.mongodb_uri == "mongodb://external.example:27017/cctv"
+
+
+def test_partial_mongodb_credentials_are_rejected():
+    with pytest.raises(ValidationError, match="must both be set"):
+        Settings(_env_file=None, MONGODB_USERNAME="cctv")
+
+
+def test_jwt_signing_key_requires_a_configured_secret():
+    settings = Settings(_env_file=None, JWT_SECRET_KEY="")
+
+    with pytest.raises(RuntimeError, match="JWT_SECRET_KEY"):
+        _ = settings.jwt_signing_key
 
 
 @pytest.mark.parametrize("algorithm", ["none", "RS256", "hs256"])

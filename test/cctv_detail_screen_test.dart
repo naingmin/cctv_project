@@ -32,12 +32,15 @@ void main() {
 
   group('CctvDetailScreen', () {
     testWidgets('shows the record details', (tester) async {
-      when(() => service.getCctvById('r1')).thenAnswer((_) async => fakeRecord());
+      when(() => service.getCctvById('r1'))
+          .thenAnswer((_) async => fakeRecord(type: 'Dome'));
 
       await pump(tester);
 
       expect(find.text('CCTV-YGN-000001'), findsWidgets);
       expect(find.textContaining('Bahan'), findsWidgets);
+      expect(find.text('Type'), findsOneWidget);
+      expect(find.text('Dome'), findsOneWidget);
       expect(find.textContaining('Main intersection camera'), findsOneWidget);
     });
 

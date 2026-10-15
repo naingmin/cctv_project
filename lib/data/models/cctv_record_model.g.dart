@@ -22,6 +22,7 @@ CctvRecord _$CctvRecordFromJson(Map<String, dynamic> json) => CctvRecord(
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
       status: json['status'] as String? ?? 'ACTIVE',
+      type: json['type'] as String?,
       description: json['description'] as String?,
       images: (json['images'] as List<dynamic>?)
               ?.map((e) => CctvImage.fromJson(e as Map<String, dynamic>))
@@ -47,6 +48,7 @@ Map<String, dynamic> _$CctvRecordToJson(CctvRecord instance) =>
       'description': instance.description,
       'tags': instance.tags,
       'status': instance.status,
+      'type': instance.type,
       'images': instance.images,
       'view_image_url': instance.viewImageUrl,
       'created_by': instance.createdBy,

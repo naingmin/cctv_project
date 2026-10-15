@@ -1,10 +1,16 @@
 """Application configuration loaded from environment variables."""
 import base64
 from functools import lru_cache
+from pathlib import Path
 from typing import List
+from urllib.parse import quote_plus, urlsplit
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_INFRASTRUCTURE_ENV_FILE = (
+    Path(__file__).resolve().parents[2] / "infrastructure" / ".env"
+)
 
 # Placeholder/default values shipped in code, .env.example and
 # docker-compose.yml. Any of these in production means secrets were never set.
@@ -15,7 +21,7 @@ _INSECURE_JWT_SECRETS = {
     "dev-only-change-me",
 }
 _INSECURE_MINIO_CREDENTIALS = {"", "minioadmin"}
-_INSECURE_ADMIN_PASSWORDS = {"Admin@12345"}
+_INSECURE_ADMIN_PASSWORDS = {"", "Admin@12345", "SET_A_UNIQUE_ADMIN_PASSWORD_HERE"}
 _MIN_JWT_SECRET_LENGTH = 32
 _ALLOWED_JWT_ALGORITHMS = {"HS256", "HS384", "HS512"}
 
@@ -28,7 +34,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=_INFRASTRUCTURE_ENV_FILE,
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=True,
@@ -41,11 +47,18 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # --- MongoDB ---
-    MONGODB_URI: str = "mongodb://localhost:27017"
+    # Set MONGODB_URI to use a complete connection string, or set the
+    # individual host/port/credential fields below.
+    MONGODB_URI: str = ""
+    MONGODB_HOST: str = "localhost"
+    MONGODB_PORT: int = Field(default=27017, ge=1, le=65535)
+    MONGODB_USERNAME: str = ""
+    MONGODB_PASSWORD: str = ""
+    MONGODB_AUTH_SOURCE: str = "admin"
     MONGODB_DATABASE: str = "cctv_manager"
 
     # --- JWT ---
-    JWT_SECRET_KEY: str = "change-me-in-production"
+    JWT_SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
@@ -66,8 +79,8 @@ class Settings(BaseSettings):
     # Must be the browser/phone-visible host, e.g. http://localhost:9000.
     # Falls back to MINIO_ENDPOINT when unset.
     MINIO_PUBLIC_ENDPOINT: str = ""
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_ACCESS_KEY: str = ""
+    MINIO_SECRET_KEY: str = ""
     MINIO_BUCKET: str = "cctv-media"
     MINIO_REGION: str = "us-east-1"
     MINIO_USE_SSL: bool = False
@@ -92,7 +105,7 @@ class Settings(BaseSettings):
     # --- Default admin (seed only; change password after first login) ---
     DEFAULT_ADMIN_USERNAME: str = "admin"
     DEFAULT_ADMIN_EMAIL: str = "admin@example.com"
-    DEFAULT_ADMIN_PASSWORD: str = "Admin@12345"
+    DEFAULT_ADMIN_PASSWORD: str = ""
     DEFAULT_ADMIN_FULL_NAME: str = "System Administrator"
 
     @field_validator("CORS_ORIGINS", mode="before")
@@ -136,6 +149,13 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _refuse_insecure_production(self) -> "Settings":
         """Fail fast instead of serving production with known secrets."""
+        if not self.MONGODB_URI and bool(self.MONGODB_USERNAME) != bool(
+            self.MONGODB_PASSWORD
+        ):
+            raise ValueError(
+                "MONGODB_USERNAME and MONGODB_PASSWORD must both be set or both be empty."
+            )
+
         if not self.is_production:
             return self
         problems = []
@@ -154,6 +174,18 @@ class Settings(BaseSettings):
             problems.append("MINIO_ACCESS_KEY / MINIO_SECRET_KEY use the default")
         if self.DEFAULT_ADMIN_PASSWORD in _INSECURE_ADMIN_PASSWORDS:
             problems.append("DEFAULT_ADMIN_PASSWORD uses the default")
+        if self.MONGODB_URI:
+            parsed_mongodb_uri = urlsplit(self.MONGODB_URI)
+            mongodb_has_credentials = (
+                parsed_mongodb_uri.username is not None
+                and parsed_mongodb_uri.password is not None
+            )
+        else:
+            mongodb_has_credentials = bool(
+                self.MONGODB_USERNAME and self.MONGODB_PASSWORD
+            )
+        if not mongodb_has_credentials:
+            problems.append("MongoDB authentication credentials are not set")
         if not self.CCTV_CREDENTIALS_ENCRYPTION_KEY:
             problems.append("CCTV_CREDENTIALS_ENCRYPTION_KEY is not set")
         if self.DEBUG:
@@ -189,6 +221,41 @@ class Settings(BaseSettings):
     def minio_endpoint(self) -> str:
         """Endpoint the backend uses for S3 operations."""
         return self.MINIO_ENDPOINT
+
+    @property
+    def jwt_signing_key(self) -> str:
+        """Return a configured, non-placeholder key for signing legacy JWTs."""
+        if (
+            self.JWT_SECRET_KEY in _INSECURE_JWT_SECRETS
+            or len(self.JWT_SECRET_KEY) < _MIN_JWT_SECRET_LENGTH
+        ):
+            raise RuntimeError(
+                "Set JWT_SECRET_KEY to a random value of at least "
+                f"{_MIN_JWT_SECRET_LENGTH} characters in infrastructure/.env."
+            )
+        return self.JWT_SECRET_KEY
+
+    @property
+    def mongodb_uri(self) -> str:
+        """Return the explicit MongoDB URI or build one from its components."""
+        if self.MONGODB_URI:
+            return self.MONGODB_URI
+
+        credentials = ""
+        if self.MONGODB_USERNAME and self.MONGODB_PASSWORD:
+            credentials = (
+                f"{quote_plus(self.MONGODB_USERNAME)}:"
+                f"{quote_plus(self.MONGODB_PASSWORD)}@"
+            )
+        auth_source = (
+            f"?authSource={quote_plus(self.MONGODB_AUTH_SOURCE)}"
+            if credentials
+            else ""
+        )
+        return (
+            f"mongodb://{credentials}{self.MONGODB_HOST}:{self.MONGODB_PORT}/"
+            f"{self.MONGODB_DATABASE}{auth_source}"
+        )
 
     @property
     def minio_public_endpoint(self) -> str:

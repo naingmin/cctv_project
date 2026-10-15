@@ -45,6 +45,7 @@ def list_cctvs(
     limit: int = Query(settings.DEFAULT_PAGE_SIZE, ge=1, le=settings.MAX_PAGE_SIZE),
     search: Optional[str] = Query(None, max_length=200),
     status_filter: Optional[str] = Query(None, alias="status", max_length=64, pattern=_STATUS_PATTERN),
+    type: Optional[str] = Query(None, max_length=32, pattern=r"^(Dome|Bullet|PTZ)(,(Dome|Bullet|PTZ))*$"),
     region: Optional[str] = Query(None, max_length=120),
     township: Optional[str] = Query(None, max_length=120),
     tag: Optional[str] = Query(
@@ -75,6 +76,7 @@ def list_cctvs(
         db,
         search=search,
         status=status_filter,
+        type=type,
         region=region,
         township=township,
         tag=tag,

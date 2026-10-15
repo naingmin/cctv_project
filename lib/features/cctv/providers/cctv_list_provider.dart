@@ -19,6 +19,9 @@ class CctvListState {
 
   /// One status or a comma-separated list, e.g. `ACTIVE,MAINTENANCE`.
   final String? statusFilter;
+
+  /// One type or a comma-separated list, e.g. `Dome,Bullet`.
+  final String? typeFilter;
   final String? regionFilter;
   final String? townshipFilter;
 
@@ -35,6 +38,7 @@ class CctvListState {
     this.error,
     this.search = '',
     this.statusFilter,
+    this.typeFilter,
     this.regionFilter,
     this.townshipFilter,
     this.selectedTags = const [],
@@ -45,6 +49,7 @@ class CctvListState {
 
   bool get hasFilters =>
       statusFilter != null ||
+      typeFilter != null ||
       regionFilter != null ||
       townshipFilter != null ||
       selectedTags.isNotEmpty;
@@ -65,6 +70,7 @@ class CctvListState {
     Object? error = _unset,
     String? search,
     Object? statusFilter = _unset,
+    Object? typeFilter = _unset,
     Object? regionFilter = _unset,
     Object? townshipFilter = _unset,
     Object? selectedTags = _unset,
@@ -81,6 +87,9 @@ class CctvListState {
       statusFilter: identical(statusFilter, _unset)
           ? this.statusFilter
           : statusFilter as String?,
+      typeFilter: identical(typeFilter, _unset)
+          ? this.typeFilter
+          : typeFilter as String?,
       regionFilter: identical(regionFilter, _unset)
           ? this.regionFilter
           : regionFilter as String?,
@@ -215,6 +224,7 @@ class CctvListNotifier extends StateNotifier<CctvListState> {
       page: page,
       search: query.search.isNotEmpty ? query.search : null,
       status: query.statusFilter,
+      type: query.typeFilter,
       region: query.regionFilter,
       township: query.townshipFilter,
       tag: query.selectedTags.isEmpty ? null : query.selectedTags.join(','),
@@ -256,9 +266,10 @@ class CctvListNotifier extends StateNotifier<CctvListState> {
   }
 
   /// Replaces all filters. `null` clears that filter.
-  void setFilters({String? status, String? region, String? township}) {
+  void setFilters({String? status, String? type, String? region, String? township}) {
     state = state.copyWith(
       statusFilter: _blankToNull(status),
+      typeFilter: _blankToNull(type),
       regionFilter: _blankToNull(region),
       townshipFilter: _blankToNull(township),
     );
@@ -308,6 +319,7 @@ class CctvListNotifier extends StateNotifier<CctvListState> {
   void clearFilters() {
     state = state.copyWith(
       statusFilter: null,
+      typeFilter: null,
       regionFilter: null,
       townshipFilter: null,
       selectedTags: const [],

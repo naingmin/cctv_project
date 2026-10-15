@@ -35,6 +35,7 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
   final _townshipController = TextEditingController();
   String? _status = 'ACTIVE';
   String? _direction;
+  String? _type;
 
   @override
   void initState() {
@@ -134,6 +135,7 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
     notifier.updateField('township', _townshipController.text.trim());
     notifier.updateField('direction', _direction);
     notifier.updateField('status', _status ?? 'ACTIVE');
+    notifier.updateField('type', _type);
     // Tags are already managed by the FilterChip onSelected callbacks,
     // which update the form state directly. No additional call needed.
 
@@ -206,6 +208,20 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
                 ),
                 obscureText: true,
                 textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _type,
+                decoration: const InputDecoration(
+                  hintText: 'Type',
+                  prefixIcon: Icon(Icons.videocam_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Dome', child: Text('Dome')),
+                  DropdownMenuItem(value: 'Bullet', child: Text('Bullet')),
+                  DropdownMenuItem(value: 'PTZ', child: Text('PTZ')),
+                ],
+                onChanged: (value) => setState(() => _type = value),
               ),
               const SizedBox(height: 16),
               Text(

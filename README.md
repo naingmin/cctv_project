@@ -22,6 +22,8 @@ Project/
 
 ```bash
 # 1. Backend + MongoDB + MinIO
+#    First copy infrastructure/.env.example to infrastructure/.env and set
+#    the required credentials/secrets (see docs/deployment.md).
 docker compose -f infrastructure/docker-compose.yml up -d --build
 #    API:     http://localhost:8000
 #    Docs:    http://localhost:8000/docs
@@ -34,7 +36,7 @@ flutter run
 ```
 
 A default admin is created only when the database is empty, using
-`DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_PASSWORD` from `backend/.env`.
+`DEFAULT_ADMIN_USERNAME` / `DEFAULT_ADMIN_PASSWORD` from `infrastructure/.env`.
 Change its password immediately:
 
 ```bash
@@ -53,7 +55,7 @@ cd backend
 python -m venv .venv
 . .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt -r requirements-dev.txt
-cp .env.example .env            # edit values
+# Configure infrastructure/.env from infrastructure/.env.example first.
 python -m app.bootstrap         # ensure indexes + default admin
 uvicorn app.main:app --reload
 
@@ -74,8 +76,9 @@ Configure the API base URL for the app (see `lib/core/config/app_config.dart`).
 
 ## Environment variables
 
-See `backend/.env.example` for the full list. Key groups: app/env, MongoDB,
-JWT, MinIO, CORS, map tiles, default admin seed.
+See `infrastructure/.env.example` for the Compose and backend secrets.
+Additional backend options are listed in `backend/.env.example`; settings are
+read from `infrastructure/.env`, not `backend/.env`.
 
 Never commit real secrets; `.env` is git-ignored.
 

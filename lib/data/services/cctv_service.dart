@@ -18,6 +18,7 @@ class CctvService {
     int limit = AppConstants.defaultPageSize,
     String? search,
     String? status,
+    String? type,
     String? region,
     String? township,
     String? tag,
@@ -25,6 +26,7 @@ class CctvService {
     final query = <String, dynamic>{'page': page, 'limit': limit};
     if (search != null && search.isNotEmpty) query['search'] = search;
     if (status != null && status.isNotEmpty) query['status'] = status;
+    if (type != null && type.isNotEmpty) query['type'] = type;
     if (region != null && region.isNotEmpty) query['region'] = region;
     if (township != null && township.isNotEmpty) query['township'] = township;
     if (tag != null && tag.isNotEmpty) query['tag'] = tag;
@@ -218,6 +220,7 @@ class CctvService {
       'password': r.password,
       'tags': r.tags,
       'status': r.status,
+      'type': r.type,
       'description': r.description,
     };
   }

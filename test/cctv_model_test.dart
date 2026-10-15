@@ -19,6 +19,7 @@ void main() {
         'password': 'camera-secret',
         'tags': ['ALPRS', 'CPCS'],
         'status': 'ACTIVE',
+        'type': 'Dome',
         'images': [],
         'created_at': '2024-01-01T00:00:00Z',
         'updated_at': '2024-01-01T00:00:00Z',
@@ -40,6 +41,7 @@ void main() {
       expect(record.password, 'camera-secret');
       expect(record.tags, ['ALPRS', 'CPCS']);
       expect(record.status, 'ACTIVE');
+      expect(record.type, 'Dome');
       expect(record.operationalStatus, 'operational');
     });
 

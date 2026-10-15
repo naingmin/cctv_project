@@ -9,10 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// would get, so a regression in the fallback logic is caught.
 void main() {
   group('AppConfig', () {
-    test('apiBaseUrl falls back to the emulator host alias', () {
-      // 10.0.2.2 is how the Android emulator reaches the host machine. Plain
-      // localhost would resolve to the emulator itself.
-      expect(AppConfig.apiBaseUrl, 'http://10.0.2.2:8000');
+    test('apiBaseUrl falls back to the deployment VPS address', () {
+      // The deployment VPS runs both the backend and MinIO. Plain
+      // localhost would resolve to the emulator/device itself.
+      expect(AppConfig.apiBaseUrl, 'http://169.58.39.152:8000');
     });
 
     test('apiPrefix defaults to /api/v1', () {
@@ -29,7 +29,7 @@ void main() {
     });
 
     test('apiEndpoint reduces the base URL to host:port', () {
-      expect(AppConfig.apiEndpoint, '10.0.2.2:8000');
+      expect(AppConfig.apiEndpoint, '169.58.39.152:8000');
     });
 
     test('apiEndpoint survives a malformed base URL', () {
@@ -50,7 +50,7 @@ void main() {
       expect(AppConfig.apiEndpoint, '192.168.1.5:8000');
 
       AppConfig.apiBaseUrlOverride = null;
-      expect(AppConfig.apiBaseUrl, 'http://10.0.2.2:8000');
+      expect(AppConfig.apiBaseUrl, 'http://169.58.39.152:8000');
     });
   });
 }

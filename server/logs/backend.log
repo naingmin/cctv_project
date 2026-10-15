@@ -4,3 +4,74 @@ C:\ProgramData\anaconda3\python.exe: No module named uvicorn
 C:\ProgramData\anaconda3\python.exe: No module named uvicorn
 C:\ProgramData\anaconda3\python.exe: No module named uvicorn
 C:\ProgramData\anaconda3\python.exe: No module named uvicorn
+INFO:     Started server process [20784]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-10-14T11:59:50+0630 | INFO     | app.main | GET /health -> 200 (1.2ms) rid=1859c24d-9285-42df-ae42-c8cc3be8fb38
+2026-10-14T11:59:50+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=69004415-4114-4f01-97b8-6afd5fab281f
+^CINFO:     Started server process [14568]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000): only one usage of each socket address (protocol/network address/port) is normally permitted
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Started server process [4468]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-10-15T10:56:43+0630 | INFO     | app.main | GET /health -> 200 (3.1ms) rid=370965a3-7a0b-4ad9-91f3-af7a37851066
+2026-10-15T10:56:51+0630 | INFO     | app.main | GET /health -> 200 (1.3ms) rid=45c7ec08-3602-432b-a265-efdd007d4b39
+2026-10-15T10:56:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.5ms) rid=093ff7f3-080c-423e-81b1-de16697a3030
+2026-10-15T10:57:18+0630 | INFO     | app.main | DELETE /api/v1/cctvs/6ad05594edd35ec73191e664 -> 204 (31.1ms) rid=e5f63ef5-c115-4e99-b9ce-1bb9d8701cae
+2026-10-15T10:57:21+0630 | INFO     | app.main | POST /api/v1/auth/logout -> 200 (15.7ms) rid=72390a43-77f3-46e5-a513-e8a74d370e02
+2026-10-15T10:57:21+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=c58bcdbc-0b31-4725-b900-726075a538e9
+2026-10-15T10:57:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=337c2ed2-181c-47ca-a055-26386fac5f96
+2026-10-15T10:57:33+0630 | INFO     | app.main | POST /api/v1/auth/login -> 200 (68.6ms) rid=f9bd406b-bba1-4af3-826c-eee1e26e9055
+2026-10-15T10:57:33+0630 | INFO     | app.main | GET /api/v1/auth/me -> 200 (8.2ms) rid=ca8c1282-7c21-4dba-9956-d6a9574f76b0
+2026-10-15T10:57:34+0630 | INFO     | app.main | GET /api/v1/cctvs/stats -> 200 (12.3ms) rid=c7432295-700d-40f4-b024-401041d18ea7
+2026-10-15T10:57:34+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (9.4ms) rid=a73c69b6-af56-4e63-884e-536e670dcebb
+2026-10-15T10:57:37+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (7.3ms) rid=79e28a9c-a0ad-40e3-859c-fbd56dfc8e5d
+2026-10-15T10:57:37+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (10.4ms) rid=2ff95edc-8132-459c-88ee-44bec0360c85
+2026-10-15T10:57:37+0630 | INFO     | app.main | GET /api/v1/cctvs/stats -> 200 (8.0ms) rid=19128573-7939-464b-a2e2-d87002c089ff
+2026-10-15T10:57:37+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (5.8ms) rid=15625dca-3edc-4aad-acf5-7f834469c66a
+2026-10-15T10:57:38+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (6.8ms) rid=3659b474-cb10-4a0f-ac07-0baad14dc608
+2026-10-15T10:57:38+0630 | INFO     | app.main | GET /api/v1/cctvs/stats -> 200 (6.4ms) rid=63975a8c-da49-4a15-80d7-f76246ad4006
+2026-10-15T10:57:38+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (5.0ms) rid=29f47a0a-43be-44c0-b96f-9a86dd353022
+2026-10-15T10:57:40+0630 | INFO     | app.main | GET /api/v1/cctvs/map -> 200 (6.4ms) rid=a4fb05c0-513c-445b-afa4-c398ba7d2441
+2026-10-15T10:57:41+0630 | INFO     | app.main | GET /api/v1/users -> 200 (6.5ms) rid=1b1cc44f-4216-4efa-a75f-6c947b1d75fb
+2026-10-15T10:57:51+0630 | INFO     | app.main | GET /health -> 200 (1.3ms) rid=b1340160-3b2a-4ebc-9cac-ed0a0fe35fdb
+2026-10-15T10:57:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=c183a56d-2602-4371-91ef-2fb640d46095
+2026-10-15T10:58:21+0630 | INFO     | app.main | GET /api/v1/cctvs/areas -> 200 (9.3ms) rid=5f4bbb28-4e91-454e-969b-8ccdd5484ecf
+2026-10-15T10:58:21+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=36abcb2b-3e57-4ce0-96ef-5f8641792642
+2026-10-15T10:58:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=e00ffc0f-0a21-4943-811d-8ab4e0068b96
+2026-10-15T10:58:51+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=dd53ff52-218f-42dc-888d-e1525056fd12
+2026-10-15T10:58:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=afe8c7b3-f4ea-4335-a219-dd63e9fb7091
+2026-10-15T10:59:21+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=f9ebfcf8-746a-4793-a7a8-019a07e752ee
+2026-10-15T10:59:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=c708a2b9-a2df-480d-b1bc-8cfd970179f5
+2026-10-15T10:59:21+0630 | INFO     | app.main | POST /api/v1/cctvs -> 201 (30.1ms) rid=38c14659-7a49-42c7-ad94-1efb34efd650
+2026-10-15T10:59:22+0630 | INFO     | app.main | POST /api/v1/uploads/presign -> 200 (404.5ms) rid=7edf2579-faa7-4b43-848f-2bdc781166f7
+2026-10-15T10:59:23+0630 | INFO     | app.main | GET /api/v1/cctvs -> 200 (6.1ms) rid=9722d132-e2d3-4ba9-bbaa-bbc1b319829a
+2026-10-15T10:59:24+0630 | INFO     | app.main | GET /api/v1/cctvs/6ad056a1884c7245f1890bdc -> 200 (4.3ms) rid=3dd7f060-c103-4b76-bb66-2d8929c2beb6
+2026-10-15T10:59:34+0630 | INFO     | app.main | GET /api/v1/cctvs/map -> 200 (8.4ms) rid=c6e381bb-fbaa-434d-8e4a-ff662fd46ec6
+2026-10-15T10:59:51+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=a37817b9-38c0-4382-8a3c-a60ad00b2162
+2026-10-15T10:59:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=08cb8f25-2634-403e-a53b-a3ede4c366d1
+2026-10-15T11:00:21+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=8c2a1696-7de7-4b74-850d-c4755b9a5ef5
+2026-10-15T11:00:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=29dbb613-379c-4e3c-a6f8-26cc815b5390
+2026-10-15T11:00:51+0630 | INFO     | app.main | GET /health -> 200 (2.7ms) rid=dcb9f757-b171-4252-acb3-5015c34063b1
+2026-10-15T11:00:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=8a427eaf-f565-40a1-ac72-961ec0bed02f
+2026-10-15T11:01:21+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=c4f34455-1382-4f38-8fca-4924b6f88892
+2026-10-15T11:01:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=16e2e3c4-5393-4791-9c6f-de0a55be4251
+2026-10-15T11:01:51+0630 | INFO     | app.main | GET /health -> 200 (1.1ms) rid=4eccb1ee-03be-4e2e-903c-bc682e0a2d49
+2026-10-15T11:01:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=a942505e-6c29-497f-86e1-76185827cbe7
+INFO:     Started server process [7044]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started server process [8884]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-10-15T11:06:16+0630 | INFO     | app.main | GET /health -> 200 (1.2ms) rid=5a0f61b7-4d1a-402b-9d86-98f4834cd2ee
+2026-10-15T11:06:21+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=55b45728-7ee0-47a7-9076-5d3da43626d0
+2026-10-15T11:06:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=c6b6dbc6-f426-436d-8fbb-a5e6323620bd

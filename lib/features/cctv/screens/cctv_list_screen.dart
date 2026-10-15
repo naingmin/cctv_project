@@ -52,11 +52,13 @@ class _CctvListScreenState extends ConsumerState<CctvListScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => FilterSheet(
         currentStatus: state.statusFilter,
+        currentType: state.typeFilter,
         currentRegion: state.regionFilter,
         currentTownship: state.townshipFilter,
-        onApply: (status, region, township) {
+        onApply: (status, type, region, township) {
           ref.read(cctvListProvider.notifier).setFilters(
                 status: status,
+                type: type,
                 region: region,
                 township: township,
               );
@@ -94,7 +96,7 @@ class _CctvListScreenState extends ConsumerState<CctvListScreen> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: SearchField(
-              hintText: 'Search CCTV ID, name, road...',
+              hintText: 'Search CCTV ID, type, region, township...',
               onChanged: (value) {
                 ref.read(cctvListProvider.notifier).setSearch(value);
               },
@@ -127,6 +129,7 @@ class _CctvListScreenState extends ConsumerState<CctvListScreen> {
 
           // Active filters
           if (state.statusFilter != null ||
+              state.typeFilter != null ||
               state.regionFilter != null ||
               state.townshipFilter != null ||
               state.selectedTags.isNotEmpty)

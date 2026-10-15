@@ -225,6 +225,7 @@ def serialize_cctv(doc: dict, *, include_credentials: bool = False) -> dict:
         "direction": doc.get("direction"),
         "tags": doc.get("tags", []),
         "status": doc.get("status", "ACTIVE"),
+        "type": doc.get("type"),
         "description": doc.get("description"),
         "images": doc.get("images", []),
         "view_image_url": _presigned_view_url(doc.get("images", [])),
@@ -306,6 +307,7 @@ def create_cctv(db: Database, payload: CctvCreate, *, user: Any) -> dict:
         "password": _encrypt_credential(payload.password),
         "tags": payload.tags,
         "status": payload.status,
+        "type": payload.type,
         "description": payload.description,
         "images": [],
         "created_by": user_id,
@@ -348,6 +350,7 @@ def update_cctv(
         "password",
         "tags",
         "status",
+        "type",
         "description",
     ):
         if field in data:
@@ -417,6 +420,7 @@ def _build_filter(
     township: Optional[str],
     date_from: Optional[datetime],
     date_to: Optional[datetime],
+    type: Optional[str] = None,
     tag: Optional[str] = None,
 ) -> dict:
     query: dict[str, Any] = {}
@@ -426,6 +430,7 @@ def _build_filter(
         regex = {"$regex": re.escape(search.strip()), "$options": "i"}
         query["$or"] = [
             {"cctv_id": regex},
+            {"type": regex},
             {"region": regex},
             {"township": regex},
             {"street": regex},
@@ -433,6 +438,9 @@ def _build_filter(
         ]
     if status:
         query["status"] = _status_condition(status)
+    if type:
+        type_values = sorted({t.strip() for t in type.split(",") if t.strip()})
+        query["type"] = type_values[0] if len(type_values) == 1 else {"$in": type_values}
     if region:
         query["region"] = region
     if township:
@@ -462,6 +470,7 @@ def list_cctvs(
     skip: int,
     limit: int,
     user: Any,
+    type: Optional[str] = None,
     tag: Optional[str] = None,
 ) -> tuple[list[dict], int]:
     """Paginated records matching the filters, limited to the user's scope.
@@ -473,6 +482,7 @@ def list_cctvs(
         _build_filter(
             search=search,
             status=status,
+            type=type,
             region=region,
             township=township,
             tag=tag,

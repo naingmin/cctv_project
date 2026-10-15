@@ -1,0 +1,129 @@
+CCTV APP API SERVER SETUP
+========================
+
+1. USING THE BACKEND ON YOUR LOCAL COMPUTER
+-------------------------------------------
+
+Your phone must connect to your computer's Wi-Fi IP address while the backend
+is running locally. The phone and computer must be on the same Wi-Fi network.
+
+Find the computer's current address:
+
+1. Open Command Prompt on the computer running the backend.
+2. Run:
+
+   ipconfig
+
+3. Under the active Wi-Fi adapter, find "IPv4 Address". It looks like
+   192.168.x.x.
+
+The computer's Wi-Fi address was 192.168.50.252 during a recent check, but
+confirm it with ipconfig because the address can change.
+
+Set the address in the phone app:
+
+1. Open the app's Sign In screen.
+2. Tap the small "Server: ..." address below the Sign In button.
+3. Enter the computer's IP and backend port. For example:
+
+   http://192.168.50.252:8000
+
+4. Tap "Save Server". Do not add /api/v1; the app adds it automatically.
+5. Test from the phone's browser by opening the address with /health appended:
+
+   http://192.168.50.252:8000/health
+
+   A working server returns a short response containing "status":"ok".
+
+If /health does not load, check that the backend is running, Windows Firewall
+allows inbound connections on port 8000 on the private network, and the Wi-Fi
+network does not isolate devices from each other.
+
+To avoid having to change the phone setting whenever the router assigns a new
+address, create a DHCP reservation for the computer in the router settings.
+If you do not reserve the address and it changes, repeat the phone steps with
+the new address.
+
+Changing the address through the phone app's Server setting does not require
+rebuilding or reinstalling the APK. The app saves the address on that phone.
+Changing the default address in lib/core/config/app_config.dart requires an
+APK rebuild for future installs.
+
+
+2. DEPLOYING THE BACKEND ON A VPS
+---------------------------------
+
+A VPS is appropriate when phones need to connect from outside the local
+Wi-Fi network. The app should then use a domain or public VPS address instead
+of the computer's local IP.
+
+Prepare a domain:
+
+1. Choose a domain, for example example.com.
+2. Create DNS records pointing to the VPS public IP:
+
+   api.example.com   -> VPS public IP
+   media.example.com -> VPS public IP
+
+3. Set up HTTPS for the API and media endpoints. Prefer domain names over
+   entering a raw VPS IP; the domain can keep working if the VPS IP changes.
+
+Prepare and deploy the backend:
+
+1. Put the project on the VPS, for example by cloning the repository.
+2. Configure deployment variables. The Compose deployment reads variables
+   from infrastructure/.env.
+3. Set strong, unique production values for database and service credentials,
+   the JWT signing key, administrator password, and
+   CCTV_CREDENTIALS_ENCRYPTION_KEY. Keep these secret and out of Git.
+4. Set the backend to production mode and disable debug mode. The current
+   Compose file contains development settings and example credential
+   defaults; do not expose it publicly unchanged.
+5. Configure the backend's internal object-storage endpoint for Docker
+   networking. Set the public object-storage endpoint to the HTTPS media
+   domain. Uploaded images use storage URLs separately from the API URL.
+6. Put an HTTPS reverse proxy in front of the API and media service. Expose
+   HTTPS to the internet; do not expose MongoDB or the storage administration
+   console. Keep MongoDB private and secured.
+7. Start or rebuild the services using the production configuration. When
+   backend code changes, rebuild its image; restarting alone may keep running
+   an old image. The project Compose file is:
+
+   infrastructure/docker-compose.yml
+
+8. Verify the API in a browser:
+
+   https://api.example.com/health
+
+9. In the phone app, tap the "Server: ..." address on the Sign In screen,
+   enter the API origin, and tap "Save Server":
+
+   https://api.example.com
+
+   The app adds /api/v1 automatically. Do not enter that suffix yourself.
+
+
+3. MIGRATING EXISTING DATA TO THE VPS
+-------------------------------------
+
+A new VPS deployment does not automatically contain data from the computer.
+Back up and migrate MongoDB data and object-storage files separately.
+
+Keep the same CCTV_CREDENTIALS_ENCRYPTION_KEY when migrating records that
+contain encrypted CCTV credentials. Losing or changing this key can make the
+stored credentials unreadable.
+
+See docs/deployment.md for the project's deployment and backup overview.
+
+
+QUICK SUMMARY
+-------------
+
+Local, same Wi-Fi:
+  http://<computer-Wi-Fi-IP>:8000
+
+VPS, accessible over the internet:
+  https://api.<your-domain>
+
+In both cases, enter the address in the app's Sign In screen by tapping the
+"Server: ..." address below the Sign In button, then tap "Save Server".

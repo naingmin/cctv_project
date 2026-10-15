@@ -12,7 +12,7 @@ MINIO_SECRET_KEY=<secret key from infrastructure/.env>
 MINIO_BUCKET=cctv-media
 MINIO_REGION=us-east-1
 MINIO_USE_SSL=false
-MINIO_PUBLIC_ENDPOINT=http://localhost:9000
+MINIO_PUBLIC_ENDPOINT=http://169.58.39.152:9000
 PRESIGN_EXPIRE_SECONDS=300
 ```
 
@@ -36,17 +36,16 @@ Set `MINIO_PUBLIC_ENDPOINT` to an address the device can reach:
 
 | Flutter client | Example `MINIO_PUBLIC_ENDPOINT` |
 | --- | --- |
-| Android emulator | `http://10.0.2.2:9000` |
+| Physical Android device / deployment VPS | `http://169.58.39.152:9000` |
+| Android emulator (local dev) | `http://10.0.2.2:9000` |
 | Physical Android device on the same Wi-Fi | `http://<computer-LAN-IP>:9000`, e.g. `http://192.168.1.20:9000` |
 | Flutter web or desktop on the MinIO host | `http://localhost:9000` |
 
-For the mixed local setup (MinIO in Docker, backend running natively), set
-`MINIO_PUBLIC_ENDPOINT` in `backend/.env` and restart the backend. If the
-backend is also running in Docker, set it in `infrastructure/.env` and
-recreate the backend container. For a physical device, allow inbound access to
-port 9000 through the host firewall. `MINIO_PUBLIC_ENDPOINT` defaults to
-`MINIO_ENDPOINT` when unset, which is only correct when both live on the same
-network.
+Set `MINIO_PUBLIC_ENDPOINT` in `infrastructure/.env` for both native and
+Docker backend runs, then restart the backend. For a physical device, allow
+inbound access to port 9000 through the host firewall.
+`MINIO_PUBLIC_ENDPOINT` defaults to `MINIO_ENDPOINT` when unset, which is only
+correct when both live on the same network.
 
 Rewriting a presigned URL's host invalidates its signature, so in production
 point `MINIO_PUBLIC_ENDPOINT` at the address clients actually use (a reverse

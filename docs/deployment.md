@@ -2,11 +2,27 @@
 
 ## Local development
 
-Before starting the Docker stack, set `CCTV_CREDENTIALS_ENCRYPTION_KEY` in
-`infrastructure/.env` to a stable URL-safe base64 key generated from 32 random
-bytes. For a native backend, set the same key in `backend/.env`. The backend
-requires it to save CCTV IP addresses and stream credentials; Compose refuses
-to start without it.
+1. Copy `infrastructure/.env.example` to `infrastructure/.env`.
+   If `infrastructure/.env` already exists, merge in missing entries instead
+   of overwriting its existing credentials.
+2. Fill in the MongoDB username/password, a unique default admin password,
+   and a randomly generated `JWT_SECRET_KEY`:
+
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(64))"
+   ```
+
+3. Generate `CCTV_CREDENTIALS_ENCRYPTION_KEY` from 32 random bytes and keep it
+   stable. Losing it makes previously encrypted CCTV credentials unreadable:
+
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   ```
+
+Compose reads `infrastructure/.env` for variable substitution. The backend
+also resolves that same file by path, so native runs do not depend on the
+current working directory. Do not commit the file or paste its contents into
+logs or support requests.
 
 ```bash
 # 1. Start Mongo, MinIO, and the API
@@ -24,7 +40,6 @@ To run the backend directly (without Docker):
 cd backend
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env                                # fill in values
 python -m app.bootstrap                             # indexes + default admin
 uvicorn app.main:app --reload
 ```
@@ -34,7 +49,13 @@ uvicorn app.main:app --reload
 - [ ] Set `ENVIRONMENT=production` (disables `/docs`, `/redoc`, `/openapi.json`).
 - [ ] Use a long random `JWT_SECRET_KEY`
       (`python -c "import secrets; print(secrets.token_urlsafe(64))"`).
-- [ ] Set `MONGODB_URI` to a secured/authenticated cluster.
+- [ ] Set `MONGODB_URI` to a secured/authenticated cluster, or configure
+      `MONGODB_HOST`, `MONGODB_PORT`, `MONGODB_USERNAME`, and
+      `MONGODB_PASSWORD`.
+- [ ] Supply `DEFAULT_ADMIN_PASSWORD` only for initial seeding; rotate it after
+      first login and avoid reusing it elsewhere.
+- [ ] Back up `CCTV_CREDENTIALS_ENCRYPTION_KEY` securely and keep it unchanged
+      while encrypted CCTV credentials must remain readable.
 - [ ] Set strong, unique MinIO credentials; keep the bucket private.
 - [ ] Serve everything over **HTTPS** (TLS at a reverse proxy / load balancer).
 - [ ] Set `CORS_ORIGINS` to the exact allowed origins — never `*`.

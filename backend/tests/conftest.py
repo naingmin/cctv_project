@@ -5,12 +5,17 @@ import mongomock
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import settings
 from app.api.deps import get_db
 from app.core.rbac import Role
 from app.core.rate_limit import reset_limiters
 from app.main import create_app
 from app.schemas.user import UserCreate
 from app.services import user_service
+
+# Auth tests must not depend on developer or deployment secrets.
+if len(settings.JWT_SECRET_KEY) < 32:
+    settings.JWT_SECRET_KEY = "test-only-" + "x" * 48
 
 ADMIN = {"username": "admin", "password": "Admin@12345"}
 USER = {"username": "viewer", "password": "Viewer@12345"}

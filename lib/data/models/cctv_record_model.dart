@@ -34,6 +34,7 @@ class CctvRecord {
 
   /// Status is one of ACTIVE, INACTIVE, MAINTENANCE (backend enum).
   final String status;
+  final String? type;
   final List<CctvImage> images;
 
   /// Presigned GET URL for the primary view image, supplied per response
@@ -63,6 +64,7 @@ class CctvRecord {
     this.password,
     this.tags = const [],
     this.status = 'ACTIVE',
+    this.type,
     this.description,
     this.images = const [],
     this.viewImageUrl,
@@ -143,6 +145,7 @@ class CctvRecord {
     String? password,
     List<String>? tags,
     String? status,
+    String? type,
     String? description,
     List<CctvImage>? images,
     String? viewImageUrl,
@@ -166,6 +169,7 @@ class CctvRecord {
       password: password ?? this.password,
       tags: tags ?? this.tags,
       status: status ?? this.status,
+      type: type ?? this.type,
       description: description ?? this.description,
       images: images ?? this.images,
       viewImageUrl: viewImageUrl ?? this.viewImageUrl,

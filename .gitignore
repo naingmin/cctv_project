@@ -23,6 +23,8 @@ Thumbs.db
 *.iml
 
 # --- Secrets ---
+# Local Compose/backend configuration; commit only .env.example templates.
+infrastructure/.env
 *.pem
 *.key
 

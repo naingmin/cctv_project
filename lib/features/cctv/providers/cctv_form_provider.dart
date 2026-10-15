@@ -32,6 +32,7 @@ class CctvFormState {
   final String? street;
   final String? direction;
   final String status;
+  final String? type;
 
   const CctvFormState({
     this.isLoading = false,
@@ -57,6 +58,7 @@ class CctvFormState {
     this.street,
     this.direction,
     this.status = 'ACTIVE',
+    this.type,
   });
 
   CctvFormState copyWith({
@@ -83,6 +85,7 @@ class CctvFormState {
     String? street,
     String? direction,
     String? status,
+    String? type,
     bool clearGpsAccuracy = false,
     bool clearCctvViewImage = false,
   }) {
@@ -111,6 +114,7 @@ class CctvFormState {
       street: street ?? this.street,
       direction: direction ?? this.direction,
       status: status ?? this.status,
+      type: type ?? this.type,
     );
   }
 }
@@ -257,6 +261,9 @@ class CctvFormNotifier extends StateNotifier<CctvFormState> {
       case 'status':
         state = state.copyWith(status: value);
         break;
+      case 'type':
+        state = state.copyWith(type: value);
+        break;
     }
   }
 
@@ -296,6 +303,7 @@ class CctvFormNotifier extends StateNotifier<CctvFormState> {
         password: state.password,
         tags: state.tags,
         status: state.status,
+        type: state.type,
         description: state.description,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

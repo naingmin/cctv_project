@@ -95,7 +95,7 @@ def create_access_token_legacy(
         "iat": _now(),
     }
     token = jwt.encode(
-        payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        payload, settings.jwt_signing_key, algorithm=settings.JWT_ALGORITHM
     )
     return token, int(expires_delta.total_seconds())
 
@@ -110,7 +110,7 @@ def decode_access_token(token: str) -> dict:
     Returns the decoded token payload dictionary.
     """
     payload = jwt.decode(
-        token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        token, settings.jwt_signing_key, algorithms=[settings.JWT_ALGORITHM]
     )
     return payload
 
@@ -174,7 +174,7 @@ def create_access_token_keycloak(
         }
         payload = jwt.decode(
             token,
-            settings.JWT_SECRET_KEY,
+            settings.jwt_signing_key,
             algorithms=[algorithm],
             options=options,
             issuer=settings.KEYCLOOK_ISSUER,  # e.g. https://auth.example.com/realms/cctv-realm
@@ -214,7 +214,7 @@ def decode_access_token_legacy(token: str) -> dict[str, Any]:
     """Decode and validate a legacy access token. Raises jwt exceptions on failure."""
     payload = jwt.decode(
         token,
-        settings.JWT_SECRET_KEY,
+        settings.jwt_signing_key,
         algorithms=[settings.JWT_ALGORITHM],
     )
     if payload.get("type") != "access":
@@ -249,7 +249,7 @@ def _validate_keycloak_token(token: str) -> dict[str, Any]:
 
     payload = jwt.decode(
         token,
-        settings.JWT_SECRET_KEY,
+        settings.jwt_signing_key,
         algorithms=[algorithm],
     )
 

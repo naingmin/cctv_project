@@ -71,13 +71,13 @@ class AppConfig {
   static String _setting(String fromDefine, String key, String fallback) =>
       fromDefine.isNotEmpty ? fromDefine : _env[key] ?? fallback;
 
-  /// Base URL of the FastAPI backend, e.g. `http://10.0.2.2:8000`.
+  /// Base URL of the FastAPI backend, e.g. `http://169.58.39.152:8000`.
   ///
   /// Note `localhost` on a physical device resolves to the phone itself; use
   /// the machine's LAN IP (or a public host) for real builds. The fallback
-  /// targets the Android emulator's host alias.
+  /// targets the deployment VPS.
   static String get apiBaseUrl => _runtimeApiBaseUrl ??
-      _setting(_defineApiBaseUrl, 'API_BASE_URL', 'http://10.0.2.2:8000');
+      _setting(_defineApiBaseUrl, 'API_BASE_URL', 'http://192.168.50.252:8000');
 
   /// API version prefix.
   static String get apiPrefix =>

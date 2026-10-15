@@ -21,7 +21,7 @@ def connect() -> Database:
     if _db is not None:
         return _db
     _client = MongoClient(
-        settings.MONGODB_URI,
+        settings.mongodb_uri,
         uuidRepresentation="standard",
         serverSelectionTimeoutMS=5000,
     )
@@ -74,6 +74,7 @@ def init_indexes() -> None:
     db.cctvs.create_index("cctv_id", unique=True, name="uniq_cctv_id")
     db.cctvs.create_index([("location", "2dsphere")], name="geo_location")
     db.cctvs.create_index("status", name="ix_status")
+    db.cctvs.create_index("type", name="ix_type")
     db.cctvs.create_index("tags", name="ix_tags")
     db.cctvs.create_index("region", name="ix_region")
     db.cctvs.create_index("township", name="ix_township")

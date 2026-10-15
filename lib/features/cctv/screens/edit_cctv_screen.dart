@@ -36,6 +36,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
   late final TextEditingController _townshipController;
   String? _initializedRecordId;
   String? _status;
+  String? _type;
   String? _direction;
   List<String> _tags = [];
   double? _latitude;
@@ -91,6 +92,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
     _streetController.text = record.street ?? '';
     _townshipController.text = record.township ?? '';
     _status = record.status;
+    _type = record.type;
     _direction = record.direction;
     _tags = List<String>.from(record.tags);
     _latitude = record.latitude;
@@ -217,6 +219,20 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
                     },
                   );
                 }).toList(),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _type,
+                decoration: const InputDecoration(
+                  hintText: 'Type',
+                  prefixIcon: Icon(Icons.videocam_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Dome', child: Text('Dome')),
+                  DropdownMenuItem(value: 'Bullet', child: Text('Bullet')),
+                  DropdownMenuItem(value: 'PTZ', child: Text('PTZ')),
+                ],
+                onChanged: (value) => setState(() => _type = value),
               ),
               const SizedBox(height: 24),
               _buildSectionTitle(context, 'LOCATION'),
@@ -394,6 +410,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
               password: _passwordController.text,
               tags: _tags,
               status: _status ?? record.status,
+              type: _type,
               updatedAt: DateTime.now(),
               clearDirection: _direction == null,
             ),

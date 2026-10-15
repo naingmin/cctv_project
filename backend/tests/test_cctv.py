@@ -24,7 +24,7 @@ def _payload(**overrides):
 def test_create_and_get(client, admin_token):
     created = client.post(
         "/api/v1/cctvs",
-        json=_payload(direction="E"),
+        json=_payload(direction="E", type="Dome"),
         headers=auth(admin_token),
     )
     assert created.status_code == 201
@@ -34,12 +34,14 @@ def test_create_and_get(client, admin_token):
     assert data["longitude"] == 96.1561
     assert data["latitude"] == 16.8409
     assert data["direction"] == "E"
+    assert data["type"] == "Dome"
 
     fetched = client.get(
         f"/api/v1/cctvs/{data['id']}", headers=auth(admin_token)
     ).json()["data"]
     assert fetched["id"] == data["id"]
     assert fetched["direction"] == "E"
+    assert fetched["type"] == "Dome"
 
 
 def test_update_direction(client, admin_token):
@@ -248,6 +250,37 @@ def test_search_and_filter(client, admin_token):
         "/api/v1/cctvs?township=Bahan", headers=auth(admin_token)
     ).json()["data"]
     assert by_township["pagination"]["total"] == 1
+
+
+def test_filter_by_type(client, admin_token):
+    client.post(
+        "/api/v1/cctvs",
+        json=_payload(type="Dome"),
+        headers=auth(admin_token),
+    )
+    client.post(
+        "/api/v1/cctvs",
+        json=_payload(cctv_id="CCTV-MDY-000001", type="Bullet"),
+        headers=auth(admin_token),
+    )
+
+    filtered = client.get(
+        "/api/v1/cctvs?type=Dome", headers=auth(admin_token)
+    )
+
+    assert filtered.status_code == 200
+    data = filtered.json()["data"]
+    assert data["pagination"]["total"] == 1
+    assert data["items"][0]["cctv_id"] == "CCTV-YGN-000001"
+
+    searched = client.get(
+        "/api/v1/cctvs?search=Dome", headers=auth(admin_token)
+    )
+
+    assert searched.status_code == 200
+    searched_data = searched.json()["data"]
+    assert searched_data["pagination"]["total"] == 1
+    assert searched_data["items"][0]["cctv_id"] == "CCTV-YGN-000001"
 
 
 def test_filter_by_tag(client, admin_token):

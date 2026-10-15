@@ -10,8 +10,8 @@ rem  Output is appended to server\logs\backend.log
 rem ============================================================
 setlocal
 
-set PYTHON=C:\ProgramData\anaconda3\python.exe
-set PROJECT=C:\Users\user\Desktop\Project
+set PYTHON=C:\Users\user\Desktop\cctv_project\backend\.venv\Scripts\python.exe
+set PROJECT=C:\Users\user\Desktop\cctv_project
 
 if not exist "%PROJECT%\server\logs" mkdir "%PROJECT%\server\logs"
 

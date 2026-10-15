@@ -61,6 +61,7 @@ class CctvBase(BaseModel):
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: List[str] = Field(default_factory=list, max_length=4)
     status: str = Field(default="ACTIVE", pattern=r"^(ACTIVE|INACTIVE|MAINTENANCE)$")
+    type: Optional[str] = Field(default=None, pattern=r"^(Dome|Bullet|PTZ)$")
 
     @field_validator("ip_address")
     @classmethod
@@ -115,6 +116,7 @@ class CctvUpdate(BaseModel):
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: Optional[List[str]] = Field(default=None, max_length=4)
     status: Optional[str] = Field(default=None, pattern=r"^(ACTIVE|INACTIVE|MAINTENANCE)$")
+    type: Optional[str] = Field(default=None, pattern=r"^(Dome|Bullet|PTZ)$")
 
     @field_validator("ip_address")
     @classmethod

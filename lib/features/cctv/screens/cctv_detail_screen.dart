@@ -233,6 +233,7 @@ class CctvDetailScreen extends ConsumerWidget {
 
             // Details
             _buildSection(context, 'Details', [
+              _buildDetailRow(context, 'Type', record.type),
               _buildDetailRow(context, 'Region', record.region),
               _buildDetailRow(context, 'Township', record.township),
               _buildDetailRow(context, 'Street', record.street),
