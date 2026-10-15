@@ -188,3 +188,5 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 2026-10-15T11:17:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=d9338428-9bc4-4abd-a1fb-93feaa08fb89
 2026-10-15T11:18:21+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=cd501872-d7b9-4ee1-b396-c8f5b1ff46b1
 2026-10-15T11:18:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=3e6d840e-5050-4e40-9f42-947470fe2503
+2026-10-15T11:18:51+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=152f4a54-edf4-4daa-b130-fc7990063ca0
+2026-10-15T11:18:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=cd819229-7296-4acf-a656-0a436e45046d
