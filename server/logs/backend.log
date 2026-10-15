@@ -269,4 +269,11 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 2026-10-15T11:36:52+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=1c3fd134-59e9-4f42-a997-9f5eb3592e6b
 2026-10-15T11:37:22+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=80e69dcb-7653-49dd-ad4f-445d42ae3794
 2026-10-15T11:37:22+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=b5e1350e-da2f-4e5a-8e8f-46f83d7a9987
+<<<<<<< HEAD
 >>>>>>> d168abf (update backend log file)
+=======
+2026-10-15T11:37:52+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=7ab8cd72-0484-4c05-90a5-3c3c94c9156e
+2026-10-15T11:37:52+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=ea7b254a-9af7-45e8-8f4d-00bf0457c45f
+2026-10-15T11:38:22+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=98f44676-66d5-4d29-9b66-4f4b5d161675
+2026-10-15T11:38:22+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=109e0a78-46d4-49e9-a3d6-6cd4d194fb27
+>>>>>>> b843e77 (update backend log file)
