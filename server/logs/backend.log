@@ -220,4 +220,53 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 2026-10-15T11:25:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=7902b5c9-146c-4843-8e1b-f3d19295ab88
 2026-10-15T11:25:51+0630 | INFO     | app.main | GET /health -> 200 (0.4ms) rid=2e87415a-3c2b-455a-875c-fe1d9988c793
 2026-10-15T11:25:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=4217a56c-3694-4cbe-99f6-7c17225dccde
+<<<<<<< HEAD
 >>>>>>> 75fbfd5 (Initial commit for CCTV project with proper gitignore setup)
+=======
+2026-10-15T11:26:21+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=5e6a9407-747a-460d-970f-a21d3d1c7eaf
+2026-10-15T11:26:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=17026415-50f1-46ed-940a-812549f621d1
+2026-10-15T11:26:51+0630 | INFO     | app.main | GET /health -> 200 (0.5ms) rid=f9906a47-bedd-43cc-9dbd-26e648dafcf5
+2026-10-15T11:26:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=b5eb0e31-2c8c-4529-b673-a1c79890499d
+2026-10-15T11:27:21+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=a73b4944-fb5c-44bd-8d97-45c7a87ae019
+2026-10-15T11:27:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=e391e001-5fe8-4bc7-85b0-ad1ead6f9777
+2026-10-15T11:27:51+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=841d6b37-5e86-444a-8d43-a9d34527f947
+2026-10-15T11:27:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=35442ede-2f2d-4a6b-bd6b-4425673b2e5d
+2026-10-15T11:28:21+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=6132be8b-8671-487b-aef8-193f76dcae55
+2026-10-15T11:28:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=cb95be0d-319f-4894-bcfb-60df3ac6bbe2
+2026-10-15T11:28:51+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=c2287b79-b0bf-4337-80de-c7ef5b0dd954
+2026-10-15T11:28:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=964a4b76-fb8b-4573-9eb3-9518f21c68cc
+2026-10-15T11:29:21+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=64e57d6c-b095-4759-805a-e6d23498876e
+2026-10-15T11:29:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.1ms) rid=bd76f385-1b45-4370-9756-8ba2990546c9
+2026-10-15T11:29:51+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=8b349b8a-a15b-45ea-aea8-f10ddb4adb2b
+2026-10-15T11:29:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=af01c26f-5180-4f39-8ab0-46c2a5337e03
+2026-10-15T11:30:21+0630 | INFO     | app.main | GET /health -> 200 (0.5ms) rid=94ae55ec-ff5e-49de-a422-43146b5ec7e7
+2026-10-15T11:30:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=5d520467-e2c8-48dd-bb6a-26478512eafc
+2026-10-15T11:30:51+0630 | INFO     | app.main | GET /health -> 200 (0.5ms) rid=eeed0ebb-b1e5-4c29-b690-bbf55ae31714
+2026-10-15T11:30:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=1b7557d1-2051-42f2-a267-8b631dbfcc70
+2026-10-15T11:31:21+0630 | INFO     | app.main | GET /health -> 200 (0.8ms) rid=36e10fb9-4908-441c-8eb1-cbf13cbd6a2d
+2026-10-15T11:31:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=1e976cda-d923-4bfe-982a-3f28bf92f51f
+2026-10-15T11:31:51+0630 | INFO     | app.main | GET /health -> 200 (1.1ms) rid=c8541151-a565-4c39-b799-34f53884f655
+2026-10-15T11:31:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=99ee2b0c-a18e-4458-baff-0dff47a6bf6e
+2026-10-15T11:32:21+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=b03cb96f-f3d7-42ad-9ebd-1b8a3ffa64d7
+2026-10-15T11:32:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.1ms) rid=6e1ee561-922a-4472-9b05-3c70ccd60a0f
+2026-10-15T11:32:51+0630 | INFO     | app.main | GET /health -> 200 (0.4ms) rid=8c3e76f7-4028-41a7-beac-c2a6ce50d2f2
+2026-10-15T11:32:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=fb5f8ac5-7122-4942-943a-6ec0a0ed219b
+2026-10-15T11:33:21+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=3b74c39f-c205-44b6-af3e-3ed66f1ccd0f
+2026-10-15T11:33:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=26a9d833-61d6-45c5-84ea-8161361aa976
+2026-10-15T11:33:51+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=97d3b210-69cf-4c47-9f46-17e802a327d6
+2026-10-15T11:33:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=47ce2ccf-b1b2-443d-b412-2f3698977a93
+2026-10-15T11:34:21+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=f4376380-5f9a-4c38-add2-50f6a674bf98
+2026-10-15T11:34:21+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=102d3971-104c-4001-8bfa-7a9f19bf620e
+2026-10-15T11:34:51+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=1bbd2edb-7c2a-42d9-8637-95de507fe0cf
+2026-10-15T11:34:51+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=8a433a47-1f99-4201-9005-e40f521ca553
+2026-10-15T11:35:21+0630 | INFO     | app.main | GET /health -> 200 (1.4ms) rid=5539307d-653f-4d43-ba09-f26750b1b0ad
+2026-10-15T11:35:22+0630 | INFO     | app.main | GET /v1/models -> 404 (0.4ms) rid=b0288863-0e9f-40c5-88f9-6860355c7060
+2026-10-15T11:35:52+0630 | INFO     | app.main | GET /health -> 200 (0.7ms) rid=7ddfd671-08b4-4264-9f30-e8bb8df92457
+2026-10-15T11:35:52+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=8c75fed8-59d3-43d0-b918-0c2c13ae4d01
+2026-10-15T11:36:22+0630 | INFO     | app.main | GET /health -> 200 (0.6ms) rid=ec3adbaf-ab3f-4e02-bfa8-6b6453805bf4
+2026-10-15T11:36:22+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=e6e79b4a-034d-431a-bf16-cabd13cf9c16
+2026-10-15T11:36:52+0630 | INFO     | app.main | GET /health -> 200 (1.2ms) rid=3319dc78-6585-4718-947b-5ae7d332a822
+2026-10-15T11:36:52+0630 | INFO     | app.main | GET /v1/models -> 404 (0.3ms) rid=1c3fd134-59e9-4f42-a997-9f5eb3592e6b
+2026-10-15T11:37:22+0630 | INFO     | app.main | GET /health -> 200 (0.9ms) rid=80e69dcb-7653-49dd-ad4f-445d42ae3794
+2026-10-15T11:37:22+0630 | INFO     | app.main | GET /v1/models -> 404 (0.2ms) rid=b5e1350e-da2f-4e5a-8e8f-46f83d7a9987
+>>>>>>> d168abf (update backend log file)
