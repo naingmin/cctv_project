@@ -103,7 +103,9 @@ class AppRouter {
               ),
               GoRoute(
                 path: '/cctv',
-                builder: (context, state) => const CctvListScreen(),
+                builder: (context, state) => CctvListScreen(
+                  initialQuery: state.uri.queryParameters,
+                ),
               ),
               GoRoute(
                 path: '/cctv/add',

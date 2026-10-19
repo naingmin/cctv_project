@@ -8,6 +8,7 @@ class StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color? color;
+  final VoidCallback? onTap;
 
   const StatCard({
     super.key,
@@ -15,20 +16,26 @@ class StatCard extends StatelessWidget {
     required this.value,
     required this.icon,
     this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final accentColor = color ?? AppColors.primary;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+    return Material(
+      color: AppColors.cardBackground,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -63,6 +70,8 @@ class StatCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      ),
       ),
     );
   }

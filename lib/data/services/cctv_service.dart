@@ -21,6 +21,8 @@ class CctvService {
     String? type,
     String? region,
     String? township,
+    String? dateFrom,
+    String? dateTo,
     String? tag,
   }) async {
     final query = <String, dynamic>{'page': page, 'limit': limit};
@@ -29,6 +31,8 @@ class CctvService {
     if (type != null && type.isNotEmpty) query['type'] = type;
     if (region != null && region.isNotEmpty) query['region'] = region;
     if (township != null && township.isNotEmpty) query['township'] = township;
+    if (dateFrom != null && dateFrom.isNotEmpty) query['date_from'] = dateFrom;
+    if (dateTo != null && dateTo.isNotEmpty) query['date_to'] = dateTo;
     if (tag != null && tag.isNotEmpty) query['tag'] = tag;
 
     final response = await _api.get('/cctvs', query: query);

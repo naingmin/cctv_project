@@ -25,6 +25,10 @@ class CctvListState {
   final String? regionFilter;
   final String? townshipFilter;
 
+  /// ISO 8601 date-time range for when the record was created.
+  final String? dateFrom;
+  final String? dateTo;
+
   /// Selected purpose tags. An empty list represents "All".
   final List<String> selectedTags;
   final int page;
@@ -41,6 +45,8 @@ class CctvListState {
     this.typeFilter,
     this.regionFilter,
     this.townshipFilter,
+    this.dateFrom,
+    this.dateTo,
     this.selectedTags = const [],
     this.page = 1,
     this.hasNext = false,
@@ -52,6 +58,8 @@ class CctvListState {
       typeFilter != null ||
       regionFilter != null ||
       townshipFilter != null ||
+      dateFrom != null ||
+      dateTo != null ||
       selectedTags.isNotEmpty;
 
   /// Compatibility accessor for code that refers to filters collectively.
@@ -73,6 +81,8 @@ class CctvListState {
     Object? typeFilter = _unset,
     Object? regionFilter = _unset,
     Object? townshipFilter = _unset,
+    Object? dateFrom = _unset,
+    Object? dateTo = _unset,
     Object? selectedTags = _unset,
     int? page,
     bool? hasNext,
@@ -96,6 +106,12 @@ class CctvListState {
       townshipFilter: identical(townshipFilter, _unset)
           ? this.townshipFilter
           : townshipFilter as String?,
+      dateFrom: identical(dateFrom, _unset)
+          ? this.dateFrom
+          : dateFrom as String?,
+      dateTo: identical(dateTo, _unset)
+          ? this.dateTo
+          : dateTo as String?,
       selectedTags: identical(selectedTags, _unset)
           ? this.selectedTags
           : List<String>.unmodifiable(selectedTags as List<String>),
@@ -227,6 +243,8 @@ class CctvListNotifier extends StateNotifier<CctvListState> {
       type: query.typeFilter,
       region: query.regionFilter,
       township: query.townshipFilter,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
       tag: query.selectedTags.isEmpty ? null : query.selectedTags.join(','),
     );
 
@@ -266,12 +284,21 @@ class CctvListNotifier extends StateNotifier<CctvListState> {
   }
 
   /// Replaces all filters. `null` clears that filter.
-  void setFilters({String? status, String? type, String? region, String? township}) {
+  void setFilters({
+    String? status,
+    String? type,
+    String? region,
+    String? township,
+    String? dateFrom,
+    String? dateTo,
+  }) {
     state = state.copyWith(
       statusFilter: _blankToNull(status),
       typeFilter: _blankToNull(type),
       regionFilter: _blankToNull(region),
       townshipFilter: _blankToNull(township),
+      dateFrom: _blankToNull(dateFrom),
+      dateTo: _blankToNull(dateTo),
     );
     load();
   }
@@ -322,6 +349,8 @@ class CctvListNotifier extends StateNotifier<CctvListState> {
       typeFilter: null,
       regionFilter: null,
       townshipFilter: null,
+      dateFrom: null,
+      dateTo: null,
       selectedTags: const [],
     );
     load();

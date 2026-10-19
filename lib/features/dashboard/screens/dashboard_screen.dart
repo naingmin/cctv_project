@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/loading_view.dart';
@@ -21,6 +22,35 @@ class DashboardScreen extends ConsumerWidget {
       // Reload the actual CCTV data first, then refresh the dashboard stats.
       await ref.read(cctvListProvider.notifier).load();
       await ref.read(dashboardProvider.notifier).load();
+    }
+
+    void goToCctvList({String? status, String? dateFrom, String? dateTo}) {
+      final queryParams = <String, String>{};
+      if (status != null) queryParams['status'] = status;
+      if (dateFrom != null) queryParams['date_from'] = dateFrom;
+      if (dateTo != null) queryParams['date_to'] = dateTo;
+      final uri = Uri(path: '/cctv', queryParameters: queryParams);
+      context.push(uri.toString());
+    }
+
+    void goToTodayAdded() {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      goToCctvList(
+        dateFrom: startOfDay.toIso8601String(),
+        dateTo: endOfDay.toIso8601String(),
+      );
+    }
+
+    void goToThisMonthAdded() {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = DateTime(now.year, now.month + 1, 1);
+      goToCctvList(
+        dateFrom: startOfMonth.toIso8601String(),
+        dateTo: endOfMonth.toIso8601String(),
+      );
     }
 
     return Scaffold(
@@ -67,42 +97,49 @@ class DashboardScreen extends ConsumerWidget {
                                 value: _formatNumber(state.stats!.totalCctv),
                                 icon: Icons.videocam,
                                 color: AppColors.primary,
+                                onTap: () => context.push('/cctv'),
                               ),
                               StatCard(
                                 label: 'Added Today',
                                 value: _formatNumber(state.stats!.addedToday),
                                 icon: Icons.today,
                                 color: AppColors.success,
+                                onTap: goToTodayAdded,
                               ),
                               StatCard(
                                 label: 'Total Users',
                                 value: _formatNumber(state.stats!.totalUsers),
                                 icon: Icons.people,
                                 color: AppColors.accent,
+                                onTap: () => context.push('/users'),
                               ),
                               StatCard(
                                 label: 'Active',
                                 value: _formatNumber(state.stats!.activeCctv),
                                 icon: Icons.check_circle,
                                 color: AppColors.success,
+                                onTap: () => goToCctvList(status: 'ACTIVE'),
                               ),
                               StatCard(
                                 label: 'Inactive',
                                 value: _formatNumber(state.stats!.inactiveCctv),
                                 icon: Icons.cancel,
                                 color: AppColors.danger,
+                                onTap: () => goToCctvList(status: 'INACTIVE'),
                               ),
                               StatCard(
                                 label: 'Maintenance',
                                 value: _formatNumber(state.stats!.maintenanceCctv),
                                 icon: Icons.build,
                                 color: AppColors.warning,
+                                onTap: () => goToCctvList(status: 'MAINTENANCE'),
                               ),
                               StatCard(
                                 label: 'Added This Month',
                                 value: _formatNumber(state.stats!.addedThisMonth),
                                 icon: Icons.calendar_month,
                                 color: AppColors.info,
+                                onTap: goToThisMonthAdded,
                               ),
                             ],
                           ),

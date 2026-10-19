@@ -16,7 +16,9 @@ import '../widgets/filter_sheet.dart';
 
 /// CCTV records list screen with search, filter, and pagination.
 class CctvListScreen extends ConsumerStatefulWidget {
-  const CctvListScreen({super.key});
+  final Map<String, String>? initialQuery;
+
+  const CctvListScreen({super.key, this.initialQuery});
 
   @override
   ConsumerState<CctvListScreen> createState() => _CctvListScreenState();
@@ -24,11 +26,27 @@ class CctvListScreen extends ConsumerStatefulWidget {
 
 class _CctvListScreenState extends ConsumerState<CctvListScreen> {
   final _scrollController = ScrollController();
+  bool _appliedInitialQuery = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _applyInitialQuery();
+  }
+
+  void _applyInitialQuery() {
+    if (_appliedInitialQuery || widget.initialQuery == null) return;
+    _appliedInitialQuery = true;
+
+    final params = widget.initialQuery!;
+    final notifier = ref.read(cctvListProvider.notifier);
+
+    notifier.setFilters(
+      status: params['status'],
+      dateFrom: params['date_from'],
+      dateTo: params['date_to'],
+    );
   }
 
   @override
@@ -55,12 +73,16 @@ class _CctvListScreenState extends ConsumerState<CctvListScreen> {
         currentType: state.typeFilter,
         currentRegion: state.regionFilter,
         currentTownship: state.townshipFilter,
-        onApply: (status, type, region, township) {
+        currentDateFrom: state.dateFrom,
+        currentDateTo: state.dateTo,
+        onApply: (status, type, region, township, dateFrom, dateTo) {
           ref.read(cctvListProvider.notifier).setFilters(
                 status: status,
                 type: type,
                 region: region,
                 township: township,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
               );
         },
       ),
@@ -132,6 +154,8 @@ class _CctvListScreenState extends ConsumerState<CctvListScreen> {
               state.typeFilter != null ||
               state.regionFilter != null ||
               state.townshipFilter != null ||
+              state.dateFrom != null ||
+              state.dateTo != null ||
               state.selectedTags.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

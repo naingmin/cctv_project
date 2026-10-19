@@ -8,8 +8,10 @@ class FilterSheet extends StatefulWidget {
   final String? currentType;
   final String? currentRegion;
   final String? currentTownship;
-  final Function(String? status, String? type, String? region, String? township)
-      onApply;
+  final String? currentDateFrom;
+  final String? currentDateTo;
+  final Function(String? status, String? type, String? region, String? township,
+      String? dateFrom, String? dateTo) onApply;
 
   const FilterSheet({
     super.key,
@@ -17,6 +19,8 @@ class FilterSheet extends StatefulWidget {
     this.currentType,
     this.currentRegion,
     this.currentTownship,
+    this.currentDateFrom,
+    this.currentDateTo,
     required this.onApply,
   });
 
@@ -29,6 +33,8 @@ class _FilterSheetState extends State<FilterSheet> {
   Set<String> _types = {};
   Set<String> _regions = {};
   Set<String> _townships = {};
+  DateTime? _dateFrom;
+  DateTime? _dateTo;
 
   @override
   void initState() {
@@ -44,6 +50,12 @@ class _FilterSheetState extends State<FilterSheet> {
     }
     if (widget.currentTownship != null && widget.currentTownship!.isNotEmpty) {
       _townships = widget.currentTownship!.split(',').where((s) => s.isNotEmpty).toSet();
+    }
+    if (widget.currentDateFrom != null) {
+      _dateFrom = DateTime.tryParse(widget.currentDateFrom!);
+    }
+    if (widget.currentDateTo != null) {
+      _dateTo = DateTime.tryParse(widget.currentDateTo!);
     }
   }
 
@@ -167,6 +179,84 @@ class _FilterSheetState extends State<FilterSheet> {
           ),
           const SizedBox(height: 24),
 
+          // Date Range
+          Text('Date Added', style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.calendar_today, size: 16),
+                  label: Text(
+                    _dateFrom != null
+                        ? '${_dateFrom!.day}/${_dateFrom!.month}/${_dateFrom!.year}'
+                        : 'From',
+                  ),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _dateFrom ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setState(() => _dateFrom = picked);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.calendar_today, size: 16),
+                  label: Text(
+                    _dateTo != null
+                        ? '${_dateTo!.day}/${_dateTo!.month}/${_dateTo!.year}'
+                        : 'To',
+                  ),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _dateTo ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setState(() => _dateTo = picked);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    final now = DateTime.now();
+                    setState(() {
+                      _dateFrom = DateTime(now.year, now.month, now.day);
+                      _dateTo = DateTime(now.year, now.month, now.day + 1);
+                    });
+                  },
+                  child: const Text('Today'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    final now = DateTime.now();
+                    setState(() {
+                      _dateFrom = DateTime(now.year, now.month, 1);
+                      _dateTo = DateTime(now.year, now.month + 1, 1);
+                    });
+                  },
+                  child: const Text('This Month'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
           // Apply
           SizedBox(
             width: double.infinity,
@@ -177,6 +267,8 @@ class _FilterSheetState extends State<FilterSheet> {
                   _types.isEmpty ? null : _types.join(','),
                   _regions.isEmpty ? null : _regions.join(','),
                   _townships.isEmpty ? null : _townships.join(','),
+                  _dateFrom?.toIso8601String(),
+                  _dateTo?.toIso8601String(),
                 );
                 Navigator.pop(context);
               },
