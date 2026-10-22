@@ -18,6 +18,7 @@ dependencies:
 
   # Networking
   dio: ^5.4.3+1
+  web_socket_channel: ^3.0.1
 
   # Maps (OpenStreetMap). Tile URL is abstracted in AppConfig.
   flutter_map: ^6.1.0

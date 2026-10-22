@@ -30,10 +30,13 @@ class CctvRecord {
   final String? username;
   @JsonKey(includeToJson: false)
   final String? password;
+  final int? port;
   final List<String> tags;
 
   /// Status is one of ACTIVE, INACTIVE, MAINTENANCE (backend enum).
   final String status;
+  @JsonKey(name: 'last_checked')
+  final DateTime? lastChecked;
   final String? type;
   final List<CctvImage> images;
 
@@ -62,8 +65,10 @@ class CctvRecord {
     this.ipAddress,
     this.username,
     this.password,
+    this.port = 554,
     this.tags = const [],
     this.status = 'ACTIVE',
+    this.lastChecked,
     this.type,
     this.description,
     this.images = const [],
@@ -143,8 +148,10 @@ class CctvRecord {
     String? ipAddress,
     String? username,
     String? password,
+    int? port,
     List<String>? tags,
     String? status,
+    DateTime? lastChecked,
     String? type,
     String? description,
     List<CctvImage>? images,
@@ -167,8 +174,10 @@ class CctvRecord {
       ipAddress: ipAddress ?? this.ipAddress,
       username: username ?? this.username,
       password: password ?? this.password,
+      port: port ?? this.port,
       tags: tags ?? this.tags,
       status: status ?? this.status,
+      lastChecked: lastChecked ?? this.lastChecked,
       type: type ?? this.type,
       description: description ?? this.description,
       images: images ?? this.images,

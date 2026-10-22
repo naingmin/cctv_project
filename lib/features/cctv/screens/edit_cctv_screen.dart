@@ -28,6 +28,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _cctvIdController;
   late final TextEditingController _ipAddressController;
+  late final TextEditingController _portController;
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
   late final TextEditingController _descriptionController;
@@ -59,6 +60,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
     super.initState();
     _cctvIdController = TextEditingController();
     _ipAddressController = TextEditingController();
+    _portController = TextEditingController();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     _descriptionController = TextEditingController();
@@ -71,6 +73,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
   void dispose() {
     _cctvIdController.dispose();
     _ipAddressController.dispose();
+    _portController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _descriptionController.dispose();
@@ -85,6 +88,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
     _initializedRecordId = record.id;
     _cctvIdController.text = record.cctvId;
     _ipAddressController.text = record.ipAddress ?? '';
+    _portController.text = (record.port ?? 554).toString();
     _usernameController.text = record.username ?? '';
     _passwordController.text = record.password ?? '';
     _descriptionController.text = record.description ?? '';
@@ -170,6 +174,22 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
                 ),
                 keyboardType: TextInputType.url,
                 maxLength: 45,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _portController,
+                decoration: const InputDecoration(
+                  labelText: 'RTSP Port',
+                  prefixIcon: Icon(Icons.settings_ethernet),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  final port = int.tryParse(value ?? '');
+                  if (port == null || port < 1 || port > 65535) {
+                    return 'Enter a port between 1 and 65535';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -406,6 +426,7 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
               township: _townshipController.text.trim(),
               direction: _direction,
               ipAddress: _ipAddressController.text.trim(),
+              port: int.tryParse(_portController.text.trim()) ?? 554,
               username: _usernameController.text.trim(),
               password: _passwordController.text,
               tags: _tags,

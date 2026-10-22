@@ -59,6 +59,105 @@ def test_update_direction(client, admin_token):
     assert updated.json()["data"]["direction"] == "NW"
 
 
+def test_connection_test_persists_status_and_broadcasts_dashboard(
+    client, admin_token, monkeypatch
+):
+    from app.services import cctv_service
+
+    monkeypatch.setattr(cctv_service, "_encrypt_credential", lambda value: value)
+    monkeypatch.setattr(cctv_service, "_decrypt_credential", lambda value: value)
+    checked_settings = []
+
+    def verify(ip_address, port, username, password):
+        checked_settings.append((ip_address, port, username, password))
+        return True
+
+    monkeypatch.setattr(cctv_service, "verify_rtsp_connection", verify)
+    created_response = client.post(
+        "/api/v1/cctvs",
+        json=_payload(
+            ip_address="192.168.1.40",
+            port=8554,
+            username="camera-user",
+            password="camera-pass",
+        ),
+        headers=auth(admin_token),
+    )
+    created = created_response.json()["data"]
+
+    with client.websocket_connect("/api/v1/ws/dashboard") as websocket:
+        websocket.send_json({"type": "authenticate", "token": admin_token})
+        assert websocket.receive_json() == {"type": "connected"}
+
+        response = client.post(
+            f"/api/v1/cctvs/{created['id']}/test-connection",
+            headers=auth(admin_token),
+        )
+        assert response.status_code == 200
+        result = response.json()["data"]
+        assert result["connected"] is True
+        assert result["cctv"]["status"] == "ACTIVE"
+        assert result["cctv"]["last_checked"] is not None
+        assert "ip_address" not in result["cctv"]
+        assert checked_settings == [
+            ("192.168.1.40", 8554, "camera-user", "camera-pass")
+        ]
+
+        event = websocket.receive_json()
+        assert event["type"] == "dashboard_update"
+        assert event["cctv"]["id"] == created["id"]
+        assert event["cctv"]["status"] == "ACTIVE"
+        assert event["stats"]["active_cctv"] == 1
+
+
+def test_connection_test_failure_marks_cctv_inactive(
+    client, admin_token, monkeypatch
+):
+    from app.services import cctv_service
+
+    created = client.post(
+        "/api/v1/cctvs", json=_payload(), headers=auth(admin_token)
+    ).json()["data"]
+    monkeypatch.setattr(
+        cctv_service, "verify_rtsp_connection", lambda *args: False
+    )
+
+    response = client.post(
+        f"/api/v1/cctvs/{created['id']}/test-connection",
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["connected"] is False
+    assert response.json()["data"]["cctv"]["status"] == "INACTIVE"
+    assert response.json()["data"]["cctv"]["last_checked"] is not None
+
+
+def test_connection_test_rejects_non_object_id(client, admin_token):
+    response = client.post(
+        "/api/v1/cctvs/CCTV-YGN-000001/test-connection",
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 422
+    assert "MongoDB record ID" in response.json()["error"]["message"]
+    assert "display ID" in response.json()["error"]["message"]
+
+
+def test_connection_test_reports_missing_object_id(client, admin_token):
+    from bson import ObjectId
+
+    missing_id = str(ObjectId())
+    response = client.post(
+        f"/api/v1/cctvs/{missing_id}/test-connection",
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 404
+    assert missing_id in response.json()["error"]["message"]
+    assert "No CCTV record was found" in response.json()["error"]["message"]
+
+
 def test_update_all_editable_cctv_fields(client, admin_token):
     created = client.post(
         "/api/v1/cctvs", json=_payload(), headers=auth(admin_token)

@@ -57,6 +57,7 @@ class CctvBase(BaseModel):
     direction: Optional[str] = Field(default=None, pattern=r"^(N|NE|E|SE|S|SW|W|NW)$")
     description: Optional[str] = Field(default=None, max_length=2000)
     ip_address: Optional[str] = Field(default=None, max_length=45)
+    port: Optional[int] = Field(default=554, ge=1, le=65535)
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: List[str] = Field(default_factory=list, max_length=4)
@@ -112,6 +113,7 @@ class CctvUpdate(BaseModel):
     direction: Optional[str] = Field(default=None, pattern=r"^(N|NE|E|SE|S|SW|W|NW)$")
     description: Optional[str] = Field(default=None, max_length=2000)
     ip_address: Optional[str] = Field(default=None, max_length=45)
+    port: Optional[int] = Field(default=None, ge=1, le=65535)
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: Optional[List[str]] = Field(default=None, max_length=4)
@@ -168,10 +170,12 @@ class CctvResponse(BaseModel):
     street: Optional[str] = None
     direction: Optional[str] = None
     ip_address: Optional[str] = None
+    port: Optional[int] = 554
     username: Optional[str] = None
     password: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
     status: str
+    last_checked: Optional[datetime] = None
     description: Optional[str] = None
     images: List[ImageMeta] = []
     # Presigned GET URL for the primary view image, resolved per response.

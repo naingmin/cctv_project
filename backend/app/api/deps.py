@@ -164,7 +164,11 @@ def get_current_user(
     if credentials is None or not credentials.credentials:
         raise UnauthorizedError("Authentication required.")
 
-    token = credentials.credentials
+    return get_user_from_token(credentials.credentials, db)
+
+
+def get_user_from_token(token: str, db: Database) -> CurrentUser:
+    """Authenticate an access token outside an HTTP request dependency."""
 
     # Determine authentication mode based on Keycloak configuration
     has_keycloak_config = bool(

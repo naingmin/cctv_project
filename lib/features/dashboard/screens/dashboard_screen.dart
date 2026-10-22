@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../data/services/dashboard_websocket_service.dart';
 import '../../../shared/widgets/loading_view.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../cctv/providers/cctv_list_provider.dart';
@@ -17,6 +18,9 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(dashboardProvider);
+    ref.listen(dashboardUpdatesProvider, (previous, next) {
+      next.whenData(ref.read(dashboardProvider.notifier).applyUpdate);
+    });
 
     Future<void> refresh() async {
       // Reload the actual CCTV data first, then refresh the dashboard stats.
@@ -129,14 +133,17 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                               StatCard(
                                 label: 'Maintenance',
-                                value: _formatNumber(state.stats!.maintenanceCctv),
+                                value:
+                                    _formatNumber(state.stats!.maintenanceCctv),
                                 icon: Icons.build,
                                 color: AppColors.warning,
-                                onTap: () => goToCctvList(status: 'MAINTENANCE'),
+                                onTap: () =>
+                                    goToCctvList(status: 'MAINTENANCE'),
                               ),
                               StatCard(
                                 label: 'Added This Month',
-                                value: _formatNumber(state.stats!.addedThisMonth),
+                                value:
+                                    _formatNumber(state.stats!.addedThisMonth),
                                 icon: Icons.calendar_month,
                                 color: AppColors.info,
                                 onTap: goToThisMonthAdded,

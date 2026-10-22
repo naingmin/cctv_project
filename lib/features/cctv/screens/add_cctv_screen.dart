@@ -27,6 +27,7 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
   final _formKey = GlobalKey<FormState>();
   final _cctvIdController = TextEditingController();
   final _ipAddressController = TextEditingController();
+  final _portController = TextEditingController(text: '554');
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -47,6 +48,7 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
   void dispose() {
     _cctvIdController.dispose();
     _ipAddressController.dispose();
+    _portController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _descriptionController.dispose();
@@ -127,6 +129,7 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
     final notifier = ref.read(cctvFormProvider.notifier);
     notifier.updateField('cctvId', _cctvIdController.text.trim());
     notifier.updateField('ipAddress', _ipAddressController.text.trim());
+    notifier.updateField('port', _portController.text.trim());
     notifier.updateField('username', _usernameController.text.trim());
     notifier.updateField('password', _passwordController.text);
     notifier.updateField('description', _descriptionController.text.trim());
@@ -189,6 +192,22 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
                   prefixIcon: Icon(Icons.lan_outlined),
                 ),
                 keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _portController,
+                decoration: const InputDecoration(
+                  labelText: 'RTSP Port',
+                  prefixIcon: Icon(Icons.settings_ethernet),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  final port = int.tryParse(value ?? '');
+                  if (port == null || port < 1 || port > 65535) {
+                    return 'Enter a port between 1 and 65535';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(

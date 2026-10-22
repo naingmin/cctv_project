@@ -18,10 +18,14 @@ CctvRecord _$CctvRecordFromJson(Map<String, dynamic> json) => CctvRecord(
       ipAddress: json['ip_address'] as String?,
       username: json['username'] as String?,
       password: json['password'] as String?,
+      port: (json['port'] as num?)?.toInt() ?? 554,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
       status: json['status'] as String? ?? 'ACTIVE',
+      lastChecked: json['last_checked'] == null
+          ? null
+          : DateTime.parse(json['last_checked'] as String),
       type: json['type'] as String?,
       description: json['description'] as String?,
       images: (json['images'] as List<dynamic>?)
@@ -46,8 +50,10 @@ Map<String, dynamic> _$CctvRecordToJson(CctvRecord instance) =>
       'street': instance.street,
       'direction': instance.direction,
       'description': instance.description,
+      'port': instance.port,
       'tags': instance.tags,
       'status': instance.status,
+      'last_checked': instance.lastChecked?.toIso8601String(),
       'type': instance.type,
       'images': instance.images,
       'view_image_url': instance.viewImageUrl,

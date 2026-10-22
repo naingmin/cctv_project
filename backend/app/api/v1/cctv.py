@@ -1,9 +1,10 @@
 """CCTV API routes."""
 from __future__ import annotations
 
+import asyncio
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request, status
 from pymongo.database import Database
 
 from app.api.deps import CurrentUser, require_permission
@@ -13,6 +14,7 @@ from app.config import settings
 from app.db.mongo import get_db
 from app.schemas.cctv import CctvCreate, CctvUpdate
 from app.services import audit_service, cctv_service
+from app.api.v1.dashboard_ws import dashboard_connections
 
 router = APIRouter(prefix="/cctvs", tags=["CCTV"])
 
@@ -213,6 +215,7 @@ def update_cctv(
     cctv_id: str,
     payload: CctvUpdate,
     request: Request,
+    background_tasks: BackgroundTasks,
     user: CurrentUser = Depends(require_permission(Permission.CCTV_UPDATE)),
     db: Database = Depends(get_db),
 ):
@@ -227,8 +230,32 @@ def update_cctv(
         request=request,
         metadata={"changed_fields": sorted(payload.model_fields_set)},
     )
+    if "status" in payload.model_fields_set:
+        background_tasks.add_task(
+            dashboard_connections.broadcast_status_update, db, doc
+        )
     # The service layer already enforced authorization in update_cctv
     return success(cctv_service.serialize_cctv(doc), message="CCTV updated.")
+
+
+@router.post("/{cctv_id}/test-connection", status_code=status.HTTP_200_OK)
+async def test_cctv_connection(
+    cctv_id: str,
+    user: CurrentUser = Depends(require_permission(Permission.CCTV_UPDATE)),
+    db: Database = Depends(get_db),
+):
+    """Verify the stored RTSP credentials and publish the updated status."""
+    doc, connected = await asyncio.to_thread(
+        cctv_service.test_connection, db, cctv_id, user=user
+    )
+    await dashboard_connections.broadcast_status_update(db, doc)
+    return success(
+        {
+            "connected": connected,
+            "cctv": cctv_service.serialize_cctv(doc),
+        },
+        message="Connection verified." if connected else "Connection failed.",
+    )
 
 
 

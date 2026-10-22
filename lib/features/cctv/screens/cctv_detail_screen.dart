@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../core/utils/role_permissions.dart';
+import '../../../core/errors/api_exception.dart';
 import '../../../data/models/cctv_record_model.dart';
 import '../../../shared/widgets/loading_view.dart';
 import '../../../shared/widgets/error_view.dart';
@@ -45,6 +46,7 @@ class CctvDetailScreen extends ConsumerWidget {
     final state = ref.watch(cctvDetailProvider(cctvId));
     final role = ref.watch(userRoleProvider);
     final canUploadImages = RolePermissions.canUploadImages(role);
+    final canTestConnection = RolePermissions.canEditCctv(role);
 
     if (state.isLoading) {
       return const Scaffold(
@@ -184,6 +186,61 @@ class CctvDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            if (canTestConnection) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: state.isTestingConnection ||
+                          record.ipAddress == null
+                      ? null
+                      : () async {
+                          try {
+                            final result = await ref
+                                .read(cctvDetailProvider(cctvId).notifier)
+                                .testConnection();
+                            if (!context.mounted) return;
+                            AppUtils.showSnackBar(
+                              context,
+                              result.message,
+                              isError: !result.connected,
+                            );
+                            await ref.read(cctvListProvider.notifier).load();
+                          } on ApiException catch (e) {
+                            if (context.mounted) {
+                              AppUtils.showSnackBar(
+                                context,
+                                e.message,
+                                isError: true,
+                              );
+                            }
+                          }
+                        },
+                  icon: state.isTestingConnection
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.wifi_tethering),
+                  label: Text(
+                    state.isTestingConnection
+                        ? 'Testing Connection...'
+                        : 'Test Connection',
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              if (record.ipAddress == null) ...[
+                const SizedBox(height: 6),
+                const Text(
+                  'Add an IP address before testing this camera.',
+                  style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                ),
+              ],
+            ],
             const SizedBox(height: 16),
 
             // Location
@@ -239,7 +296,16 @@ class CctvDetailScreen extends ConsumerWidget {
               _buildDetailRow(context, 'Street', record.street),
               _buildDetailRow(context, 'Direction', record.direction),
               _buildDetailRow(context, 'Status', record.status),
-              _buildDetailRow(context, 'Purpose', record.tags.isNotEmpty ? record.tags.join(', ') : null),
+              _buildDetailRow(context, 'RTSP Port', record.port?.toString()),
+              _buildDetailRow(
+                context,
+                'Last Checked',
+                record.lastChecked == null
+                    ? 'Never'
+                    : AppUtils.formatDateTime(record.lastChecked!),
+              ),
+              _buildDetailRow(context, 'Purpose',
+                  record.tags.isNotEmpty ? record.tags.join(', ') : null),
             ]),
             const SizedBox(height: 16),
 

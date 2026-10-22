@@ -6,6 +6,7 @@ import '../../../data/models/dashboard_stats.dart';
 import '../../../data/models/cctv_record_model.dart';
 import '../../../data/services/cctv_service.dart';
 import '../../../data/services/dashboard_service.dart';
+import '../../../data/services/dashboard_websocket_service.dart';
 
 /// Dashboard state.
 class DashboardState {
@@ -66,6 +67,28 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         error: 'Failed to load dashboard.',
       );
     }
+  }
+
+  void applyUpdate(DashboardUpdate update) {
+    final updatedCctvId = update.cctvId;
+    final recentUploads = updatedCctvId == null || update.status == null
+        ? state.recentUploads
+        : state.recentUploads
+            .map(
+              (record) => record.id == updatedCctvId
+                  ? record.copyWith(
+                      status: update.status,
+                      lastChecked: update.lastChecked,
+                    )
+                  : record,
+            )
+            .toList();
+    state = DashboardState(
+      isLoading: state.isLoading,
+      stats: update.stats,
+      recentUploads: recentUploads,
+      error: state.error,
+    );
   }
 }
 

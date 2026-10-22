@@ -34,6 +34,7 @@ void main() {
     'street': null,
     'direction': null,
     'ip_address': null,
+    'port': 554,
     'username': null,
     'password': null,
     'tags': <String>[],
@@ -60,5 +61,22 @@ void main() {
 
     expect(updated.type, 'Dome');
     verify(() => api.put('/cctvs/record-id', data: expectedPayload)).called(1);
+  });
+
+  test('testConnection parses the persisted status result', () async {
+    when(() => api.post('/cctvs/record-id/test-connection'))
+        .thenAnswer((_) async => {
+              'data': {
+                'connected': true,
+                'cctv': record.toJson(),
+              },
+              'message': 'Connection verified.',
+            });
+
+    final result = await service.testConnection('record-id');
+
+    expect(result.connected, isTrue);
+    expect(result.cctv.id, 'record-id');
+    expect(result.message, 'Connection verified.');
   });
 }

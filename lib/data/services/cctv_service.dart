@@ -13,6 +13,16 @@ class CctvService {
 
   CctvService(this._api);
 
+  Future<CctvConnectionTestResult> testConnection(String id) async {
+    final response = await _api.post('/cctvs/$id/test-connection');
+    final data = response['data'] as Map<String, dynamic>;
+    return CctvConnectionTestResult(
+      connected: data['connected'] as bool,
+      cctv: CctvRecord.fromJson(data['cctv'] as Map<String, dynamic>),
+      message: response['message'] as String? ?? 'Connection test completed.',
+    );
+  }
+
   Future<PaginatedResponse<CctvRecord>> getCctvRecords({
     int page = 1,
     int limit = AppConstants.defaultPageSize,
@@ -220,6 +230,7 @@ class CctvService {
       'street': r.street,
       'direction': r.direction,
       'ip_address': r.ipAddress,
+      'port': r.port,
       'username': r.username,
       'password': r.password,
       'tags': r.tags,
@@ -245,6 +256,18 @@ class CctvService {
 }
 
 /// Provider for CctvService.
+class CctvConnectionTestResult {
+  final bool connected;
+  final CctvRecord cctv;
+  final String message;
+
+  const CctvConnectionTestResult({
+    required this.connected,
+    required this.cctv,
+    required this.message,
+  });
+}
+
 final cctvServiceProvider = Provider<CctvService>((ref) {
   return CctvService(ref.watch(apiClientProvider));
 });

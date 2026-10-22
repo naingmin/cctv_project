@@ -19,6 +19,7 @@ class CctvFormState {
   final String? cctvId;
   final String? description;
   final String? ipAddress;
+  final int port;
   final String? username;
   final String? password;
   final List<String> tags;
@@ -45,6 +46,7 @@ class CctvFormState {
     this.cctvId,
     this.description,
     this.ipAddress,
+    this.port = 554,
     this.username,
     this.password,
     this.tags = const [],
@@ -72,6 +74,7 @@ class CctvFormState {
     String? cctvId,
     String? description,
     String? ipAddress,
+    int? port,
     String? username,
     String? password,
     List<String>? tags,
@@ -100,6 +103,7 @@ class CctvFormState {
       cctvId: cctvId ?? this.cctvId,
       description: description ?? this.description,
       ipAddress: ipAddress ?? this.ipAddress,
+      port: port ?? this.port,
       username: username ?? this.username,
       password: password ?? this.password,
       tags: tags ?? this.tags,
@@ -234,6 +238,9 @@ class CctvFormNotifier extends StateNotifier<CctvFormState> {
       case 'ipAddress':
         state = state.copyWith(ipAddress: value);
         break;
+      case 'port':
+        state = state.copyWith(port: int.tryParse(value.toString()) ?? 554);
+        break;
       case 'username':
         state = state.copyWith(username: value);
         break;
@@ -299,6 +306,7 @@ class CctvFormNotifier extends StateNotifier<CctvFormState> {
         street: state.street,
         direction: state.direction,
         ipAddress: state.ipAddress,
+        port: state.port,
         username: state.username,
         password: state.password,
         tags: state.tags,

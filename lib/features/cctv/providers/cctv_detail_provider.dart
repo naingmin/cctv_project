@@ -7,22 +7,26 @@ import '../../../data/services/cctv_service.dart';
 /// CCTV detail state.
 class CctvDetailState {
   final bool isLoading;
+  final bool isTestingConnection;
   final CctvRecord? record;
   final String? error;
 
   const CctvDetailState({
     this.isLoading = false,
+    this.isTestingConnection = false,
     this.record,
     this.error,
   });
 
   CctvDetailState copyWith({
     bool? isLoading,
+    bool? isTestingConnection,
     CctvRecord? record,
     String? error,
   }) {
     return CctvDetailState(
       isLoading: isLoading ?? this.isLoading,
+      isTestingConnection: isTestingConnection ?? this.isTestingConnection,
       record: record ?? this.record,
       error: error,
     );
@@ -56,7 +60,8 @@ class CctvDetailNotifier extends StateNotifier<CctvDetailState> {
     } on ApiException catch (e) {
       state = CctvDetailState(isLoading: false, error: e.message);
     } catch (e) {
-      state = const CctvDetailState(isLoading: false, error: 'Record not found');
+      state =
+          const CctvDetailState(isLoading: false, error: 'Record not found');
     }
   }
 
@@ -72,6 +77,25 @@ class CctvDetailNotifier extends StateNotifier<CctvDetailState> {
     }
   }
 
+  Future<CctvConnectionTestResult> testConnection() async {
+    state = state.copyWith(isTestingConnection: true);
+    try {
+      final result = await _service.testConnection(cctvId);
+      final current = state.record;
+      if (current != null) {
+        state = state.copyWith(
+          record: current.copyWith(
+            status: result.cctv.status,
+            lastChecked: result.cctv.lastChecked,
+          ),
+        );
+      }
+      return result;
+    } finally {
+      if (mounted) state = state.copyWith(isTestingConnection: false);
+    }
+  }
+
   Future<void> deleteImage(String imageId) async {
     await _service.deleteImage(cctvId, imageId);
     await load();
@@ -82,7 +106,8 @@ class CctvDetailNotifier extends StateNotifier<CctvDetailState> {
 }
 
 /// Provider for CCTV detail.
-final cctvDetailProvider = StateNotifierProvider.family<CctvDetailNotifier,
-    CctvDetailState, String>((ref, cctvId) {
+final cctvDetailProvider =
+    StateNotifierProvider.family<CctvDetailNotifier, CctvDetailState, String>(
+        (ref, cctvId) {
   return CctvDetailNotifier(ref.watch(cctvServiceProvider), cctvId);
 });

@@ -17,7 +17,8 @@ void main() {
 
   setUp(() => service = _MockCctvService());
 
-  Future<void> pump(WidgetTester tester, {UserRole role = UserRole.user}) async {
+  Future<void> pump(WidgetTester tester,
+      {UserRole role = UserRole.user}) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -44,8 +45,10 @@ void main() {
       expect(find.textContaining('Main intersection camera'), findsOneWidget);
     });
 
-    testWidgets('viewers can add images but not edit or delete', (tester) async {
-      when(() => service.getCctvById('r1')).thenAnswer((_) async => fakeRecord());
+    testWidgets('viewers can add images but not edit or delete',
+        (tester) async {
+      when(() => service.getCctvById('r1'))
+          .thenAnswer((_) async => fakeRecord());
 
       await pump(tester, role: UserRole.user);
 
@@ -55,22 +58,26 @@ void main() {
     });
 
     testWidgets('admins can edit and delete', (tester) async {
-      when(() => service.getCctvById('r1')).thenAnswer((_) async => fakeRecord());
+      when(() => service.getCctvById('r1'))
+          .thenAnswer((_) async => fakeRecord());
 
       await pump(tester, role: UserRole.admin);
 
       expect(find.byIcon(Icons.edit), findsOneWidget);
       expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+      expect(find.text('Test Connection'), findsOneWidget);
     });
 
-    testWidgets('shows the error when the record cannot be loaded', (tester) async {
+    testWidgets('shows the error when the record cannot be loaded',
+        (tester) async {
       when(() => service.getCctvById('r1')).thenThrow(
         ApiException('The requested resource was not found.'),
       );
 
       await pump(tester);
 
-      expect(find.text('The requested resource was not found.'), findsOneWidget);
+      expect(
+          find.text('The requested resource was not found.'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
     });
   });

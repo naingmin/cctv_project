@@ -6,14 +6,21 @@ import os
 import re
 from datetime import datetime, timezone
 from typing import Any, Optional
+from urllib.parse import quote
 
 from bson import ObjectId
+from bson.errors import InvalidId
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
 from app.config import settings
-from app.core.errors import ConflictError, NotFoundError, ForbiddenError
+from app.core.errors import (
+    ConflictError,
+    ForbiddenError,
+    NotFoundError,
+    ValidationError,
+)
 from app.core.rbac import Role
 from app.schemas.cctv import CctvCreate, CctvUpdate
 from app.services import storage_service
@@ -223,8 +230,10 @@ def serialize_cctv(doc: dict, *, include_credentials: bool = False) -> dict:
         "township": doc.get("township"),
         "street": doc.get("street"),
         "direction": doc.get("direction"),
+        "port": doc.get("port", 554),
         "tags": doc.get("tags", []),
         "status": doc.get("status", "ACTIVE"),
+        "last_checked": doc.get("last_checked"),
         "type": doc.get("type"),
         "description": doc.get("description"),
         "images": doc.get("images", []),
@@ -264,7 +273,7 @@ def get_by_id(
 ) -> Optional[dict]:
     try:
         oid = ObjectId(cctv_id)
-    except Exception:
+    except InvalidId:
         return None
     query: dict[str, Any] = {"_id": oid}
     if user is not None:
@@ -303,10 +312,12 @@ def create_cctv(db: Database, payload: CctvCreate, *, user: Any) -> dict:
         "street": payload.street,
         "direction": payload.direction,
         "ip_address": _encrypt_credential(payload.ip_address),
+        "port": payload.port,
         "username": _encrypt_credential(payload.username),
         "password": _encrypt_credential(payload.password),
         "tags": payload.tags,
         "status": payload.status,
+        "last_checked": None,
         "type": payload.type,
         "description": payload.description,
         "images": [],
@@ -346,6 +357,7 @@ def update_cctv(
         "street",
         "direction",
         "ip_address",
+        "port",
         "username",
         "password",
         "tags",
@@ -392,6 +404,98 @@ def update_cctv(
     if not updated_doc:
         raise NotFoundError("CCTV not found.")
     return updated_doc
+
+
+def verify_rtsp_connection(
+    ip_address: Optional[str],
+    port: Optional[int],
+    username: Optional[str],
+    password: Optional[str],
+) -> bool:
+    """Open the camera briefly and verify that it yields a video frame."""
+    if not ip_address:
+        return False
+
+    import cv2
+
+    authority = f"[{ip_address}]" if ":" in ip_address else ip_address
+    if username:
+        credentials = quote(username, safe="")
+        if password:
+            credentials += f":{quote(password, safe='')}"
+        authority = f"{credentials}@{authority}"
+    rtsp_url = f"rtsp://{authority}:{port or 554}/Streaming/Channels/101"
+    capture = cv2.VideoCapture(
+        rtsp_url,
+        cv2.CAP_FFMPEG,
+        [
+            cv2.CAP_PROP_OPEN_TIMEOUT_MSEC,
+            5000,
+            cv2.CAP_PROP_READ_TIMEOUT_MSEC,
+            5000,
+        ],
+    )
+    try:
+        if not capture.isOpened():
+            return False
+        success, frame = capture.read()
+        return bool(success and frame is not None)
+    finally:
+        capture.release()
+
+
+def test_connection(db: Database, cctv_id: str, *, user: Any) -> tuple[dict, bool]:
+    """Check a stored camera's RTSP stream and persist its operational state."""
+    try:
+        object_id = ObjectId(cctv_id)
+    except InvalidId as exc:
+        raise ValidationError(
+            "cctv_id must be the CCTV MongoDB record ID (24-character ObjectId), "
+            f"not its display ID: {cctv_id!r}."
+        ) from exc
+
+    query: dict[str, Any] = {"_id": object_id}
+    if user is not None:
+        query = _restrict(query, user)
+    doc = db.cctvs.find_one(query)
+    if not doc:
+        raise NotFoundError(
+            f"No CCTV record was found for MongoDB ID {cctv_id!r}, "
+            "or it is outside your authorized scope."
+        )
+    _check_cctv_access(user, doc, "update")
+
+    connected = verify_rtsp_connection(
+        _decrypt_credential(doc.get("ip_address")),
+        doc.get("port", 554),
+        _decrypt_credential(doc.get("username")),
+        _decrypt_credential(doc.get("password")),
+    )
+    checked_at = _now()
+    status = "ACTIVE" if connected else "INACTIVE"
+    result = db.cctvs.update_one(
+        _restrict({"_id": doc["_id"]}, user),
+        {
+            "$set": {
+                "status": status,
+                "last_checked": checked_at,
+                "updated_at": checked_at,
+                "updated_by": user.id,
+            }
+        },
+    )
+    if result.matched_count != 1:
+        raise NotFoundError(
+            f"CCTV record {cctv_id!r} was removed or is no longer accessible."
+        )
+    updated_doc = db.cctvs.find_one(
+        _restrict({"_id": object_id}, user)
+    )
+    if not updated_doc:
+        raise NotFoundError(
+            f"CCTV record {cctv_id!r} was removed or is no longer accessible."
+        )
+    return updated_doc, connected
 
 
 def delete_cctv(db: Database, cctv_id: str, *, user: Any) -> dict:
