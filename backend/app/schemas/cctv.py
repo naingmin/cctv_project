@@ -58,6 +58,9 @@ class CctvBase(BaseModel):
     description: Optional[str] = Field(default=None, max_length=2000)
     ip_address: Optional[str] = Field(default=None, max_length=45)
     port: Optional[int] = Field(default=554, ge=1, le=65535)
+    rtsp_port: Optional[int] = Field(
+        default=554, ge=1, le=65535, description="RTSP Port number"
+    )
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: List[str] = Field(default_factory=list, max_length=4)
@@ -114,6 +117,9 @@ class CctvUpdate(BaseModel):
     description: Optional[str] = Field(default=None, max_length=2000)
     ip_address: Optional[str] = Field(default=None, max_length=45)
     port: Optional[int] = Field(default=None, ge=1, le=65535)
+    rtsp_port: Optional[int] = Field(
+        default=554, ge=1, le=65535, description="RTSP Port number"
+    )
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: Optional[List[str]] = Field(default=None, max_length=4)
@@ -171,6 +177,9 @@ class CctvResponse(BaseModel):
     direction: Optional[str] = None
     ip_address: Optional[str] = None
     port: Optional[int] = 554
+    rtsp_port: Optional[int] = Field(
+        default=554, description="RTSP Port number"
+    )
     username: Optional[str] = None
     password: Optional[str] = None
     tags: List[str] = Field(default_factory=list)

@@ -59,6 +59,32 @@ def test_update_direction(client, admin_token):
     assert updated.json()["data"]["direction"] == "NW"
 
 
+def test_create_and_update_rtsp_port(client, admin_token):
+    created = client.post(
+        "/api/v1/cctvs",
+        json=_payload(rtsp_port=8554),
+        headers=auth(admin_token),
+    ).json()["data"]
+
+    fetched = client.get(
+        f"/api/v1/cctvs/{created['id']}", headers=auth(admin_token)
+    ).json()["data"]
+    assert fetched["rtsp_port"] == 8554
+
+    updated = client.put(
+        f"/api/v1/cctvs/{created['id']}",
+        json={"rtsp_port": 9554},
+        headers=auth(admin_token),
+    )
+    assert updated.status_code == 200
+    assert updated.json()["data"]["rtsp_port"] == 9554
+
+    fetched_after_update = client.get(
+        f"/api/v1/cctvs/{created['id']}", headers=auth(admin_token)
+    ).json()["data"]
+    assert fetched_after_update["rtsp_port"] == 9554
+
+
 def test_connection_test_persists_status_and_broadcasts_dashboard(
     client, admin_token, monkeypatch
 ):
