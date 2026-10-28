@@ -118,7 +118,7 @@ class CctvUpdate(BaseModel):
     ip_address: Optional[str] = Field(default=None, max_length=45)
     port: Optional[int] = Field(default=None, ge=1, le=65535)
     rtsp_port: Optional[int] = Field(
-        default=554, ge=1, le=65535, description="RTSP Port number"
+        default=None, ge=1, le=65535, description="RTSP Port number"
     )
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)

@@ -136,6 +136,31 @@ def test_connection_test_persists_status_and_broadcasts_dashboard(
         assert event["stats"]["active_cctv"] == 1
 
 
+def test_rtsp_port_is_used_for_connection_test(client, admin_token, monkeypatch):
+    from app.services import cctv_service
+
+    checked_ports = []
+    monkeypatch.setattr(
+        cctv_service,
+        "verify_rtsp_connection",
+        lambda ip_address, port, username, password: checked_ports.append(port)
+        or True,
+    )
+    created = client.post(
+        "/api/v1/cctvs",
+        json=_payload(rtsp_port=8554),
+        headers=auth(admin_token),
+    ).json()["data"]
+
+    response = client.post(
+        f"/api/v1/cctvs/{created['id']}/test-connection",
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 200
+    assert checked_ports == [8554]
+
+
 def test_connection_test_failure_marks_cctv_inactive(
     client, admin_token, monkeypatch
 ):
