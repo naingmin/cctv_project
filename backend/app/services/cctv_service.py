@@ -230,7 +230,6 @@ def serialize_cctv(doc: dict, *, include_credentials: bool = False) -> dict:
         "township": doc.get("township"),
         "street": doc.get("street"),
         "direction": doc.get("direction"),
-        "port": doc.get("port", 554),
         "rtsp_port": doc.get("rtsp_port", 554),
         "tags": doc.get("tags", []),
         "status": doc.get("status", "ACTIVE"),
@@ -301,12 +300,6 @@ def create_cctv(db: Database, payload: CctvCreate, *, user: Any) -> dict:
 
     user_id = user.id
     now = _now()
-    rtsp_port = payload.rtsp_port
-    if (
-        "rtsp_port" not in payload.model_fields_set
-        and "port" in payload.model_fields_set
-    ):
-        rtsp_port = payload.port
     doc: dict[str, Any] = {
         "cctv_id": payload.cctv_id,
         "location": to_geojson(payload.longitude, payload.latitude),
@@ -319,8 +312,7 @@ def create_cctv(db: Database, payload: CctvCreate, *, user: Any) -> dict:
         "street": payload.street,
         "direction": payload.direction,
         "ip_address": _encrypt_credential(payload.ip_address),
-        "port": payload.port,
-        "rtsp_port": rtsp_port,
+        "rtsp_port": payload.rtsp_port,
         "username": _encrypt_credential(payload.username),
         "password": _encrypt_credential(payload.password),
         "tags": payload.tags,
@@ -365,7 +357,6 @@ def update_cctv(
         "street",
         "direction",
         "ip_address",
-        "port",
         "rtsp_port",
         "username",
         "password",
@@ -380,10 +371,6 @@ def update_cctv(
                 if field in {"ip_address", "username", "password"}
                 else data[field]
             )
-    if "rtsp_port" in data and "port" not in data:
-        updates["port"] = data["rtsp_port"]
-    elif "port" in data and "rtsp_port" not in data:
-        updates["rtsp_port"] = data["port"]
     if "latitude" in data and "longitude" in data:
         lat, lng = data["latitude"], data["longitude"]
         updates["latitude"] = lat
@@ -421,7 +408,7 @@ def update_cctv(
 
 def verify_rtsp_connection(
     ip_address: Optional[str],
-    port: Optional[int],
+    rtsp_port: Optional[int],
     username: Optional[str],
     password: Optional[str],
 ) -> bool:
@@ -437,7 +424,7 @@ def verify_rtsp_connection(
         if password:
             credentials += f":{quote(password, safe='')}"
         authority = f"{credentials}@{authority}"
-    rtsp_url = f"rtsp://{authority}:{port or 554}/Streaming/Channels/101"
+    rtsp_url = f"rtsp://{authority}:{rtsp_port or 554}/Streaming/Channels/101"
     capture = cv2.VideoCapture(
         rtsp_url,
         cv2.CAP_FFMPEG,
@@ -480,7 +467,7 @@ def test_connection(db: Database, cctv_id: str, *, user: Any) -> tuple[dict, boo
 
     connected = verify_rtsp_connection(
         _decrypt_credential(doc.get("ip_address")),
-        doc.get("rtsp_port", doc.get("port", 554)),
+        doc.get("rtsp_port", 554),
         _decrypt_credential(doc.get("username")),
         _decrypt_credential(doc.get("password")),
     )

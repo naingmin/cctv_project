@@ -57,7 +57,6 @@ class CctvBase(BaseModel):
     direction: Optional[str] = Field(default=None, pattern=r"^(N|NE|E|SE|S|SW|W|NW)$")
     description: Optional[str] = Field(default=None, max_length=2000)
     ip_address: Optional[str] = Field(default=None, max_length=45)
-    port: Optional[int] = Field(default=554, ge=1, le=65535)
     rtsp_port: Optional[int] = Field(
         default=554, ge=1, le=65535, description="RTSP Port number"
     )
@@ -116,7 +115,6 @@ class CctvUpdate(BaseModel):
     direction: Optional[str] = Field(default=None, pattern=r"^(N|NE|E|SE|S|SW|W|NW)$")
     description: Optional[str] = Field(default=None, max_length=2000)
     ip_address: Optional[str] = Field(default=None, max_length=45)
-    port: Optional[int] = Field(default=None, ge=1, le=65535)
     rtsp_port: Optional[int] = Field(
         default=None, ge=1, le=65535, description="RTSP Port number"
     )
@@ -176,7 +174,6 @@ class CctvResponse(BaseModel):
     street: Optional[str] = None
     direction: Optional[str] = None
     ip_address: Optional[str] = None
-    port: Optional[int] = 554
     rtsp_port: Optional[int] = Field(
         default=554, description="RTSP Port number"
     )

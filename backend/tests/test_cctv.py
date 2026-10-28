@@ -94,8 +94,8 @@ def test_connection_test_persists_status_and_broadcasts_dashboard(
     monkeypatch.setattr(cctv_service, "_decrypt_credential", lambda value: value)
     checked_settings = []
 
-    def verify(ip_address, port, username, password):
-        checked_settings.append((ip_address, port, username, password))
+    def verify(ip_address, rtsp_port, username, password):
+        checked_settings.append((ip_address, rtsp_port, username, password))
         return True
 
     monkeypatch.setattr(cctv_service, "verify_rtsp_connection", verify)
@@ -103,7 +103,7 @@ def test_connection_test_persists_status_and_broadcasts_dashboard(
         "/api/v1/cctvs",
         json=_payload(
             ip_address="192.168.1.40",
-            port=8554,
+            rtsp_port=8554,
             username="camera-user",
             password="camera-pass",
         ),
@@ -139,12 +139,13 @@ def test_connection_test_persists_status_and_broadcasts_dashboard(
 def test_rtsp_port_is_used_for_connection_test(client, admin_token, monkeypatch):
     from app.services import cctv_service
 
-    checked_ports = []
+    checked_rtsp_ports = []
     monkeypatch.setattr(
         cctv_service,
         "verify_rtsp_connection",
-        lambda ip_address, port, username, password: checked_ports.append(port)
-        or True,
+        lambda ip_address, rtsp_port, username, password: (
+            checked_rtsp_ports.append(rtsp_port) or True
+        ),
     )
     created = client.post(
         "/api/v1/cctvs",
@@ -158,7 +159,7 @@ def test_rtsp_port_is_used_for_connection_test(client, admin_token, monkeypatch)
     )
 
     assert response.status_code == 200
-    assert checked_ports == [8554]
+    assert checked_rtsp_ports == [8554]
 
 
 def test_connection_test_failure_marks_cctv_inactive(

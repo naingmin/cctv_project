@@ -62,9 +62,7 @@ Returns lightweight markers only.
 **CCTV record fields:** `direction` is one of `N`, `NE`, `E`, `SE`, `S`,
 `SW`, `W`, or `NW`; `description` is optional. `ip_address` must be a valid
 IPv4 or IPv6 address. Optional `username` and `password` hold stream access
-credentials. The optional RTSP `rtsp_port` defaults to `554`. The legacy
-`port` field is also accepted and used as `rtsp_port` when `rtsp_port` is
-omitted. `status` is one of
+credentials. The optional RTSP `rtsp_port` defaults to `554`. `status` is one of
 `ACTIVE`, `INACTIVE`, or `MAINTENANCE`; `last_checked` is set by a connection
 test and is null until the first check. `tags` is an array containing any
 unique combination of `ALPRS`, `FRS`, `CPCS`, and `ARDS`.
