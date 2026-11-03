@@ -45,6 +45,7 @@ Authenticated endpoints require `Authorization: Bearer <access_token>`.
 | GET | `/cctvs/nearby` | `cctv.read` |
 | GET | `/cctvs/stats` | `cctv.read` |
 | POST | `/cctvs` | `cctv.create` |
+| POST | `/cctv/discover-onvif` | `cctv.create` |
 | POST | `/cctvs/{id}/test-connection` | `cctv.update` |
 | PUT | `/cctvs/{id}` | `cctv.update` |
 | DELETE | `/cctvs/{id}` | `cctv.delete` |
@@ -80,6 +81,23 @@ connection settings already stored for that record (the request has no
 credential body). It checks the default RTSP channel using OpenCV with a
 bounded open/read timeout, then updates `status` and `last_checked`. The
 response contains `connected` and the updated CCTV record.
+
+**ONVIF discovery:** `POST /cctv/discover-onvif` accepts a camera IP address,
+ONVIF port (defaults to `80`), username, and password. It returns the first
+RTSP URI available from the camera's video profiles:
+
+```json
+{
+  "ip": "192.168.1.20",
+  "port": 80,
+  "username": "camera-user",
+  "password": "<camera password>"
+}
+```
+
+Success returns `{ "rtsp_url": "rtsp://..." }` in the standard response
+envelope. Camera authentication failures return `502`; camera timeouts return
+`504`. The route requires `cctv.create` permission.
 
 **Dashboard WebSocket:** connect to `/api/v1/ws/dashboard`. After the socket
 opens, send `{"type":"authenticate","token":"<access token>"}` as the first

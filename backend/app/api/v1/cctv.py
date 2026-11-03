@@ -4,22 +4,57 @@ from __future__ import annotations
 import asyncio
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
 from pymongo.database import Database
 
 from app.api.deps import CurrentUser, require_permission
 from app.core.errors import ValidationError, success
 from app.core.rbac import Permission
+from app.core.rate_limit import enforce_sensitive_rate_limit
 from app.config import settings
 from app.db.mongo import get_db
-from app.schemas.cctv import CctvCreate, CctvUpdate
+from app.schemas.cctv import CctvCreate, CctvUpdate, ONVIFDiscoverRequest
 from app.services import audit_service, cctv_service
 from app.api.v1.dashboard_ws import dashboard_connections
 
 router = APIRouter(prefix="/cctvs", tags=["CCTV"])
+onvif_router = APIRouter(prefix="/cctv", tags=["CCTV"])
 
 # One status, or several separated by commas, e.g. "ACTIVE,MAINTENANCE".
 _STATUS_PATTERN = r"^(ACTIVE|INACTIVE|MAINTENANCE)(,(ACTIVE|INACTIVE|MAINTENANCE))*$"
+
+
+@onvif_router.post(
+    "/discover-onvif",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_permission(Permission.CCTV_CREATE))],
+)
+async def discover_onvif(
+    payload: ONVIFDiscoverRequest,
+    request: Request,
+):
+    enforce_sensitive_rate_limit(request)
+    try:
+        rtsp_url = await asyncio.to_thread(
+            cctv_service.discover_onvif_rtsp_url,
+            payload.ip,
+            payload.port,
+            payload.username,
+            payload.password,
+        )
+    except cctv_service.ONVIFAuthenticationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)
+        ) from exc
+    except cctv_service.ONVIFTimeoutError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail=str(exc)
+        ) from exc
+    except cctv_service.ONVIFDiscoveryError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)
+        ) from exc
+    return success({"rtsp_url": rtsp_url}, message="ONVIF discovery completed.")
 
 
 def _pagination(page: int, limit: int) -> tuple[int, int]:

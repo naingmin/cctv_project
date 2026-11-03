@@ -209,3 +209,18 @@ class NearbyQuery(BaseModel):
     latitude: float
     longitude: float
     radius_meters: float = Field(gt=0, le=50_000)
+
+
+class ONVIFDiscoverRequest(BaseModel):
+    ip: str = Field(min_length=1, max_length=45)
+    port: int = Field(default=80, ge=1, le=65535)
+    username: str = Field(max_length=256)
+    password: str = Field(max_length=1024)
+
+    @field_validator("ip")
+    @classmethod
+    def _ip(cls, value: str) -> str:
+        normalized = _validate_ip_address(value)
+        if normalized is None:
+            raise ValueError("IP address is required.")
+        return normalized

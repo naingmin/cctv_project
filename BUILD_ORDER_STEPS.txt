@@ -1,0 +1,271 @@
+CCTV PROJECT - STEP-BY-STEP BUILD ORDER
+=======================================
+
+Reconstructed from the code's dependency graph (what each file imports).
+
+NOTE ON GIT HISTORY:
+The first commit (8105f37, 13-10-2026) dumped all 252 files at once
+(~23,000 lines), so git does NOT show the real incremental order.
+The order below is derived from dependencies - and it is also the order
+you should learn/build it in, because each step only depends on the
+steps before it.
+
+
+PHASE 0 - SKELETON & DEPENDENCIES
+----------------------------------
+Step 1:  pubspec.yaml
+         Declares every Flutter package (riverpod, go_router, dio,
+         flutter_map...). Nothing in lib/ compiles without it.
+
+Step 2:  backend/requirements.txt
+         Same for Python (fastapi, pymongo, pyjwt, argon2-cffi, boto3...).
+
+Step 3:  .gitignore, .env.example, analysis_options.yaml, backend/pytest.ini
+         Project hygiene + test config.
+
+Step 4:  infrastructure/docker-compose.yml + infrastructure/.env.example
+         MongoDB + MinIO + backend, so there is something to develop against.
+
+
+PHASE 1 - BACKEND FOUNDATION (the "core" that everything imports)
+------------------------------------------------------------------
+Step 5:  backend/app/config.py
+         Env-driven settings (JWT keys, Mongo URI, MinIO, CORS).
+         Imported by almost everything.
+
+Step 6:  backend/app/core/logging.py, backend/app/core/errors.py
+         Logging + global exception handlers.
+
+Step 7:  backend/app/core/security.py
+         Argon2id hashing, JWT access/refresh issuing/rotation.
+
+Step 8:  backend/app/core/rbac.py, backend/app/core/rate_limit.py
+         Role definitions (Administrator / Regional Admin / Supervisor /
+         Viewer) + rate limiting.
+
+Step 9:  backend/app/db/mongo.py
+         Connection pool + index creation (incl. the 2dsphere
+         geospatial index).
+
+Step 10: backend/app/schemas/*.py
+         Pydantic models (common, auth, user, cctv, upload, audit).
+         Pure data shapes - no logic yet.
+
+
+PHASE 2 - BACKEND BUSINESS LOGIC (services) THEN HTTP LAYER (routers)
+----------------------------------------------------------------------
+Architecture rule (from docs/architecture.md): routers are thin,
+logic lives in services so it is testable without HTTP.
+
+Step 11: backend/app/services/token_service.py
+         Refresh-token hashing + rotation.
+
+Step 12: backend/app/services/user_service.py
+         User CRUD, seeding default admin.
+
+Step 13: backend/app/services/audit_service.py
+         Audit log writes.
+
+Step 14: backend/app/services/storage_service.py
+         MinIO client + presigned URLs.
+
+Step 15: backend/app/services/cctv_service.py
+         The big one (~644 lines): CRUD, search, filter, pagination,
+         GeoJSON / $geoWithin viewport queries.
+
+Step 16: backend/app/api/deps.py
+         FastAPI dependencies: extract JWT -> current user -> check
+         permission. This glues auth to routes.
+
+Step 17: backend/app/api/v1/auth.py, users.py, cctv.py, uploads.py, audit.py
+         Thin routers calling services.
+
+Step 18: backend/app/api/v1/router.py
+         Aggregates all routers under /api/v1.
+
+Step 19: backend/app/main.py
+         App factory: logging -> CORS -> error handlers -> request-ID
+         middleware -> /health -> mount router.
+
+Step 20: backend/app/bootstrap.py, backend/scripts/set_password.py
+         One-time setup: ensure indexes + seed default admin.
+
+
+PHASE 3 - BACKEND TESTS
+-----------------------
+Step 21: backend/tests/conftest.py (fixtures)
+         Then: test_auth.py, test_rbac.py, test_cctv.py, test_storage.py,
+         test_access_control.py, test_users_audit.py, test_config_security.py
+         README claims 103 passing tests.
+
+
+PHASE 4 - FLUTTER FOUNDATION
+----------------------------
+Step 22: lib/core/config/app_config.dart
+         Base URL, feature flags. Everything network-related reads it.
+
+Step 23: lib/core/constants/app_constants.dart
+         lib/core/theme/app_colors.dart
+         lib/core/theme/app_theme.dart
+         Design system (dark theme).
+
+Step 24: lib/core/errors/api_exception.dart
+         Maps HTTP errors -> user-facing messages.
+
+Step 25: lib/core/network/api_client.dart
+         Dio wrapper: attach JWT, auto-refresh on 401, retry.
+
+Step 26: lib/core/storage/*
+         secure_storage.dart, prefs_token_store.dart,
+         server_config_store.dart
+         Where tokens and the chosen server address live.
+
+Step 27: lib/core/utils/*
+         validators.dart, role_permissions.dart, image_mime.dart,
+         picked_image.dart, app_utils.dart, local_image_store.dart
+         Pure helpers - deliberately isolated so they are trivially
+         unit-testable.
+
+Step 28: lib/data/models/*.dart  (+ generated .g.dart files)
+         cctv_record_model.dart, cctv_image_model.dart, user_model.dart,
+         dashboard_stats.dart, map_bounds.dart, paginated_response.dart
+         The .g.dart files are GENERATED by build_runner /
+         json_serializable - they are NOT hand-written.
+
+
+PHASE 5 - FLUTTER DATA SERVICES + AUTH (the vertical slice)
+-----------------------------------------------------------
+Step 29: lib/data/services/auth_service.dart
+         Login/refresh/logout calls via api_client.
+
+Step 30: lib/features/auth/providers/auth_provider.dart
+         Riverpod state: isInitializing, isAuthenticated, user.
+
+Step 31: lib/core/routing/app_router.dart
+         go_router + authRedirect() guard (redirects to /login,
+         role-based home). NOT written until screens exist -
+         it imports all of them.
+
+Step 32: lib/features/auth/screens/login_screen.dart
+         First real screen; includes the "pick your server address" flow.
+
+Step 33: lib/shared/widgets/*
+         app_scaffold.dart, primary_button.dart, secondary_button.dart,
+         loading_view.dart, error_view.dart, empty_state.dart,
+         status_badge.dart, search_field.dart, record_image.dart,
+         resilient_image.dart, user_role_badge.dart, location_card.dart
+         Reusable UI kit - built before the feature screens that use them.
+
+Step 34: lib/main.dart
+         Entry point: ensureInitialized -> load .env -> restore server
+         config -> ProviderScope -> MaterialApp.router, listens to
+         authProvider to refresh the router guard.
+
+
+PHASE 6 - FLUTTER FEATURE SCREENS (one vertical slice at a time)
+-----------------------------------------------------------------
+Each feature = model -> service -> provider -> screen -> widget
+
+Step 35: CCTV LIST
+         lib/data/services/cctv_service.dart
+         lib/features/cctv/providers/cctv_list_provider.dart
+         lib/features/cctv/screens/cctv_list_screen.dart
+         lib/features/cctv/widgets/cctv_card.dart
+         lib/features/cctv/widgets/filter_sheet.dart
+
+Step 36: CCTV DETAIL / ADD / EDIT
+         lib/features/cctv/providers/cctv_detail_provider.dart
+         lib/features/cctv/providers/cctv_form_provider.dart
+         lib/features/cctv/providers/image_upload_provider.dart
+           (presigned upload + queue)
+         lib/data/services/upload_queue_service.dart
+         lib/features/cctv/screens/add_cctv_screen.dart
+         lib/features/cctv/screens/cctv_detail_screen.dart
+         lib/features/cctv/screens/edit_cctv_screen.dart
+         lib/shared/widgets/image_gallery.dart
+
+Step 37: MAP
+         lib/data/services/location_service.dart
+         lib/features/map/providers/map_provider.dart
+         lib/features/map/screens/map_screen.dart (viewport-based loading)
+         lib/features/map/screens/map_location_picker_screen.dart
+
+Step 38: DASHBOARD
+         lib/data/services/dashboard_service.dart
+         lib/features/dashboard/providers/dashboard_provider.dart
+         lib/features/dashboard/screens/dashboard_screen.dart
+         lib/features/dashboard/widgets/stat_card.dart
+         lib/features/dashboard/widgets/recent_uploads_card.dart
+
+Step 39: USERS
+         lib/data/services/user_service.dart
+         lib/features/users/providers/user_management_provider.dart
+         lib/features/users/providers/add_user_provider.dart
+         lib/features/users/screens/user_management_screen.dart
+         lib/features/users/screens/add_user_screen.dart
+         lib/features/users/widgets/area_fields.dart
+         lib/features/users/widgets/edit_access_dialog.dart
+
+Step 40: SETTINGS
+         lib/features/settings/providers/settings_provider.dart
+         lib/features/settings/screens/settings_screen.dart
+
+Step 41: LIVE STREAM (later addition)
+         lib/features/cctv/screens/live_stream_screen.dart
+
+
+PHASE 7 - FLUTTER TESTS
+-----------------------
+Step 42: test/helpers/fake_data.dart first (shared fixtures)
+         Then per-feature:
+         validators_test.dart, role_permissions_test.dart,
+         cctv_model_test.dart, user_model_test.dart,
+         api_client_refresh_test.dart, app_config_test.dart,
+         app_router_test.dart, cctv_list_screen_test.dart,
+         cctv_list_state_test.dart, cctv_detail_screen_test.dart,
+         cctv_service_test.dart, dashboard_service_test.dart,
+         map_provider_test.dart, picked_image_test.dart
+
+
+PHASE 8 - DOCS & DEPLOYMENT (written last, describing what exists)
+-------------------------------------------------------------------
+Step 43: docs/architecture.md -> api.md -> authentication.md ->
+         mongodb.md -> minio.md -> map.md -> security.md -> deployment.md
+         Plus README.md
+         Plus server/Caddyfile, server/start_backend.bat,
+         server/install_task.ps1, server/prep_network.ps1 (Windows
+         service scripts).
+
+
+WHAT CAME AFTER THE INITIAL COMMIT (real incremental history)
+-------------------------------------------------------------
+This part IS visible in git and shows how the project evolved:
+
+Date      Commit     What changed
+--------  ---------  --------------------------------------------------
+15-10     0873c8f    Config/CORS/security hardening, API_SERVER_SETUP.txt,
+                     filter improvements
+15-10 ->  5f657c2    ~11 commits that only touch server/logs/backend.log
+          ...826bca1 (noise - ignore these)
+19-10     6496ad0    UI features: filter sheet, dashboard stats,
+                     list screen
+22-10     4136cb7    REALTIME: backend/app/api/v1/dashboard_ws.py
+                     (WebSocket) + lib/data/services/
+                     dashboard_websocket_service.dart, new model fields
+23-10     a89d5ad    New validation logic in cctv_service + tests
+28-10     3768bfa    Added then...
+          ->6306377  ...REMOVED a schema field - a good example of a
+                     feature being reverted (the diff shows exactly
+                     what was backed out)
+
+
+SUGGESTED LEARNING PATH
+-----------------------
+Build it as ONE VERTICAL SLICE:
+
+  1. Get /health responding        (Phase 0-1, step 19)
+  2. Add login end-to-end          (steps 7 -> 16 -> 17 -> 29 -> 30 -> 32)
+  3. Then expand outward
+
+That is how the dependency graph wants to be walked, and you will see
+each layer earn its keep.
