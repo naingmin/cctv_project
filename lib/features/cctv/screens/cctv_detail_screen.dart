@@ -192,7 +192,7 @@ class CctvDetailScreen extends ConsumerWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: state.isTestingConnection ||
-                          record.ipAddress == null
+                          (record.ipAddress == null && record.rtspUrl == null)
                       ? null
                       : () async {
                           try {
@@ -233,7 +233,7 @@ class CctvDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (record.ipAddress == null) ...[
+              if (record.ipAddress == null && record.rtspUrl == null) ...[
                 const SizedBox(height: 6),
                 const Text(
                   'Add an IP address before testing this camera.',
@@ -291,6 +291,8 @@ class CctvDetailScreen extends ConsumerWidget {
             // Details
             _buildSection(context, 'Details', [
               _buildDetailRow(context, 'Type', record.type),
+              _buildDetailRow(context, 'Brand', record.brand),
+              _buildDetailRow(context, 'Model', record.model),
               _buildDetailRow(context, 'Region', record.region),
               _buildDetailRow(context, 'Township', record.township),
               _buildDetailRow(context, 'Street', record.street),

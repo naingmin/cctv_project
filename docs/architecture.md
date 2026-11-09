@@ -11,6 +11,7 @@ Flutter (Dart / Riverpod / flutter_map)
 FastAPI (Python)  ──► MongoDB (metadata, GeoJSON, audit)
         │
         └────────────► MinIO (image objects, presigned URLs)
+Flutter (WebRTC / HLS) ──► MediaMTX (RTSP ingest)
 ```
 
 - **Flutter** renders the UI, captures GPS/camera input, and talks only to FastAPI.
@@ -20,6 +21,9 @@ FastAPI (Python)  ──► MongoDB (metadata, GeoJSON, audit)
   index), refresh-token hashes, and audit logs.
 - **MinIO** stores image binaries in a private bucket. Clients upload/download
   via short-lived presigned URLs.
+- **MediaMTX** pulls configured RTSP camera sources on demand and serves
+  WHEP/WebRTC and HLS playback directly to clients. FastAPI controls dynamic
+  paths and returns playback endpoints only after CCTV read authorization.
 
 ## Backend layering
 

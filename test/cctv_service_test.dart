@@ -1,5 +1,6 @@
 import 'package:cctv_manager/core/network/api_client.dart';
 import 'package:cctv_manager/data/models/cctv_record_model.dart';
+import 'package:cctv_manager/data/models/cctv_stream_model.dart';
 import 'package:cctv_manager/data/services/cctv_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -34,7 +35,10 @@ void main() {
     'street': null,
     'direction': null,
     'ip_address': null,
-    'port': 554,
+    'rtsp_port': 554,
+    'brand': null,
+    'model': null,
+    'rtsp_url': null,
     'username': null,
     'password': null,
     'tags': <String>[],
@@ -78,5 +82,24 @@ void main() {
     expect(result.connected, isTrue);
     expect(result.cctv.id, 'record-id');
     expect(result.message, 'Connection verified.');
+  });
+
+  test('getStreamEndpoints parses WHEP and HLS URLs', () async {
+    when(() => api.get('/cctvs/record-id/stream')).thenAnswer(
+      (_) async => {
+        'data': {
+          'stream_path': 'cctv-record-id',
+          'whep_url': 'http://localhost:8889/cctv-record-id/whep',
+          'hls_url': 'http://localhost:8888/cctv-record-id/index.m3u8',
+        },
+      },
+    );
+
+    final endpoints = await service.getStreamEndpoints('record-id');
+
+    expect(endpoints, isA<CctvStreamEndpoints>());
+    expect(endpoints.streamPath, 'cctv-record-id');
+    expect(endpoints.whepUrl, contains('/whep'));
+    expect(endpoints.hlsUrl, contains('/index.m3u8'));
   });
 }

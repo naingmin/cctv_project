@@ -13,7 +13,7 @@ from app.core.rbac import Permission
 from app.config import settings
 from app.db.mongo import get_db
 from app.schemas.cctv import CctvCreate, CctvUpdate
-from app.services import audit_service, cctv_service
+from app.services import audit_service, cctv_service, media_service
 from app.api.v1.dashboard_ws import dashboard_connections
 
 router = APIRouter(prefix="/cctvs", tags=["CCTV"])
@@ -161,6 +161,31 @@ def areas(
 ):
     """Region -> townships used by CCTV records the caller can see."""
     return success({"regions": cctv_service.list_areas(db, user)}, message="OK")
+
+
+@router.get("/{cctv_id}/stream", status_code=status.HTTP_200_OK)
+async def get_cctv_stream(
+    cctv_id: str,
+    user: CurrentUser = Depends(require_permission(Permission.CCTV_READ)),
+    db: Database = Depends(get_db),
+):
+    """Register the authorized camera source and return its playback URLs."""
+    from app.core.errors import NotFoundError
+
+    doc = cctv_service.get_by_id(db, cctv_id, user=user)
+    if not doc:
+        raise NotFoundError("CCTV not found.")
+    source_url = cctv_service.rtsp_stream_url(doc)
+    if not source_url:
+        raise ValidationError(
+            "Configure a supported RTSP URL for this camera before streaming."
+        )
+    playback = await asyncio.to_thread(
+        media_service.configure_stream,
+        cctv_service.stream_path(doc),
+        source_url,
+    )
+    return success(playback, message="Stream ready.")
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)

@@ -63,6 +63,12 @@ class RateLimitError(AppError):
     message = "Too many requests. Please try again later."
 
 
+class ServiceUnavailableError(AppError):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    code = "SERVICE_UNAVAILABLE"
+    message = "A required service is unavailable."
+
+
 def success(data: Any = None, message: str = "OK") -> dict[str, Any]:
     return {"success": True, "data": data, "message": message}
 

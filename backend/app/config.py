@@ -65,6 +65,11 @@ class Settings(BaseSettings):
     # URL-safe base64 encoding of a random 32-byte AES-256 key.
     CCTV_CREDENTIALS_ENCRYPTION_KEY: str = ""
 
+    # --- MediaMTX ---
+    MEDIAMTX_API_URL: str = "http://localhost:9997"
+    MEDIAMTX_WHEP_BASE_URL: str = "http://localhost:8889"
+    MEDIAMTX_HLS_BASE_URL: str = "http://localhost:8888"
+
     # --- Keycloak Integration ---
     # When these are set, FastAPI will validate Keycloak-issued access tokens
     # instead of legacy username/password tokens.

@@ -85,6 +85,124 @@ def test_create_and_update_rtsp_port(client, admin_token):
     assert fetched_after_update["rtsp_port"] == 9554
 
 
+def test_rtsp_url_is_encrypted_and_only_returned_for_detail(
+    client, db, admin_token, monkeypatch
+):
+    import secrets
+
+    from app.config import settings
+    from app.services import cctv_service
+
+    monkeypatch.setattr(
+        settings,
+        "CCTV_CREDENTIALS_ENCRYPTION_KEY",
+        secrets.token_urlsafe(32),
+    )
+    rtsp_url = "rtsp://camera-user:camera-secret@192.168.1.25:554/live"
+    created = client.post(
+        "/api/v1/cctvs",
+        json=_payload(
+            brand="Dahua",
+            model="IPC-HDW",
+            rtsp_url=rtsp_url,
+        ),
+        headers=auth(admin_token),
+    )
+    assert created.status_code == 201, created.text
+    record_id = created.json()["data"]["id"]
+    stored = cctv_service.get_by_id(db, record_id)
+    assert stored["rtsp_url"].startswith("enc:v1:")
+    assert "camera-secret" not in str(stored)
+
+    listed = client.get("/api/v1/cctvs", headers=auth(admin_token))
+    list_record = listed.json()["data"]["items"][0]
+    assert list_record["brand"] == "Dahua"
+    assert list_record["model"] == "IPC-HDW"
+    assert list_record["stream_path"] == f"cctv-{record_id}"
+    assert "rtsp_url" not in list_record
+
+    detail = client.get(
+        f"/api/v1/cctvs/{record_id}", headers=auth(admin_token)
+    ).json()["data"]
+    assert detail["rtsp_url"] == rtsp_url
+
+    replacement_url = "rtsp://192.168.1.25:554/Streaming/Channels/102"
+    updated = client.put(
+        f"/api/v1/cctvs/{record_id}",
+        json={
+            "brand": "Hikvision",
+            "model": "DS-2CD",
+            "rtsp_url": replacement_url,
+        },
+        headers=auth(admin_token),
+    )
+    assert updated.status_code == 200
+    stored = cctv_service.get_by_id(db, record_id)
+    assert stored["rtsp_url"].startswith("enc:v1:")
+    assert replacement_url not in str(stored)
+    updated_detail = client.get(
+        f"/api/v1/cctvs/{record_id}", headers=auth(admin_token)
+    ).json()["data"]
+    assert updated_detail["brand"] == "Hikvision"
+    assert updated_detail["model"] == "DS-2CD"
+    assert updated_detail["rtsp_url"] == replacement_url
+
+
+def test_stream_endpoint_registers_authorized_source(
+    client, admin_token, monkeypatch
+):
+    import secrets
+
+    from app.config import settings
+    from app.services import media_service
+
+    monkeypatch.setattr(
+        settings,
+        "CCTV_CREDENTIALS_ENCRYPTION_KEY",
+        secrets.token_urlsafe(32),
+    )
+    configured = []
+    monkeypatch.setattr(
+        media_service,
+        "configure_stream",
+        lambda path, source: configured.append((path, source))
+        or {
+            "stream_path": path,
+            "whep_url": f"http://localhost:8889/{path}/whep",
+            "hls_url": f"http://localhost:8888/{path}/index.m3u8",
+        },
+    )
+    created = client.post(
+        "/api/v1/cctvs",
+        json=_payload(
+            rtsp_url="rtsp://192.168.1.25:554/live",
+            username="camera-user",
+            password="camera-secret",
+        ),
+        headers=auth(admin_token),
+    ).json()["data"]
+
+    response = client.get(
+        f"/api/v1/cctvs/{created['id']}/stream",
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 200
+    playback = response.json()["data"]
+    assert playback["stream_path"] == f"cctv-{created['id']}"
+    assert playback["whep_url"].endswith(f"/{playback['stream_path']}/whep")
+    assert playback["hls_url"].endswith(
+        f"/{playback['stream_path']}/index.m3u8"
+    )
+    assert configured == [
+        (
+            playback["stream_path"],
+            "rtsp://camera-user:camera-secret@192.168.1.25:554/live",
+        )
+    ]
+    assert "camera-secret" not in response.text
+
+
 def test_connection_test_persists_status_and_broadcasts_dashboard(
     client, admin_token, monkeypatch
 ):
@@ -322,6 +440,15 @@ def test_invalid_ip_address_or_tags_rejected(client, admin_token, overrides):
     response = client.post(
         "/api/v1/cctvs",
         json=_payload(**overrides),
+        headers=auth(admin_token),
+    )
+    assert response.status_code == 422
+
+
+def test_invalid_rtsp_url_rejected(client, admin_token):
+    response = client.post(
+        "/api/v1/cctvs",
+        json=_payload(rtsp_url="https://camera.example/live"),
         headers=auth(admin_token),
     )
     assert response.status_code == 422

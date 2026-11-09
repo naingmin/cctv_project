@@ -4,6 +4,7 @@ from __future__ import annotations
 import ipaddress
 from datetime import datetime
 from typing import List, Optional
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -19,6 +20,20 @@ def _validate_ip_address(value: Optional[str]) -> Optional[str]:
         return str(ipaddress.ip_address(value.strip()))
     except ValueError as exc:
         raise ValueError("IP address must be a valid IPv4 or IPv6 address.") from exc
+
+
+def _validate_rtsp_url(value: Optional[str]) -> Optional[str]:
+    if value is None or not value.strip():
+        return None
+    value = value.strip()
+    try:
+        parsed = urlsplit(value)
+        if parsed.scheme.lower() != "rtsp" or not parsed.hostname:
+            raise ValueError("RTSP URL must include an rtsp:// scheme and host.")
+        parsed.port
+    except ValueError as exc:
+        raise ValueError("RTSP URL must be a valid RTSP address.") from exc
+    return value
 
 
 class ImageMeta(BaseModel):
@@ -60,6 +75,9 @@ class CctvBase(BaseModel):
     rtsp_port: Optional[int] = Field(
         default=554, ge=1, le=65535, description="RTSP Port number"
     )
+    brand: Optional[str] = Field(default=None, max_length=64)
+    model: Optional[str] = Field(default=None, max_length=120)
+    rtsp_url: Optional[str] = Field(default=None, max_length=2048)
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: List[str] = Field(default_factory=list, max_length=4)
@@ -70,6 +88,11 @@ class CctvBase(BaseModel):
     @classmethod
     def _ip_address(cls, value: Optional[str]) -> Optional[str]:
         return _validate_ip_address(value)
+
+    @field_validator("rtsp_url")
+    @classmethod
+    def _rtsp_url(cls, value: Optional[str]) -> Optional[str]:
+        return _validate_rtsp_url(value)
 
     @field_validator("tags")
     @classmethod
@@ -118,6 +141,9 @@ class CctvUpdate(BaseModel):
     rtsp_port: Optional[int] = Field(
         default=None, ge=1, le=65535, description="RTSP Port number"
     )
+    brand: Optional[str] = Field(default=None, max_length=64)
+    model: Optional[str] = Field(default=None, max_length=120)
+    rtsp_url: Optional[str] = Field(default=None, max_length=2048)
     username: Optional[str] = Field(default=None, max_length=256)
     password: Optional[str] = Field(default=None, max_length=1024)
     tags: Optional[List[str]] = Field(default=None, max_length=4)
@@ -128,6 +154,11 @@ class CctvUpdate(BaseModel):
     @classmethod
     def _ip_address(cls, value: Optional[str]) -> Optional[str]:
         return _validate_ip_address(value)
+
+    @field_validator("rtsp_url")
+    @classmethod
+    def _rtsp_url(cls, value: Optional[str]) -> Optional[str]:
+        return _validate_rtsp_url(value)
 
     @field_validator("tags")
     @classmethod
@@ -177,6 +208,10 @@ class CctvResponse(BaseModel):
     rtsp_port: Optional[int] = Field(
         default=554, description="RTSP Port number"
     )
+    brand: Optional[str] = None
+    model: Optional[str] = None
+    rtsp_url: Optional[str] = None
+    stream_path: str
     username: Optional[str] = None
     password: Optional[str] = None
     tags: List[str] = Field(default_factory=list)

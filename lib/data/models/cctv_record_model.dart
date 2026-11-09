@@ -30,6 +30,13 @@ class CctvRecord {
   final String? username;
   @JsonKey(includeToJson: false)
   final String? password;
+  final String? brand;
+  final String? model;
+  @JsonKey(name: 'rtsp_url', includeToJson: false)
+  final String? rtspUrl;
+  @JsonKey(name: 'stream_path')
+  final String? streamPath;
+  @JsonKey(name: 'rtsp_port')
   final int? port;
   final List<String> tags;
 
@@ -65,6 +72,10 @@ class CctvRecord {
     this.ipAddress,
     this.username,
     this.password,
+    this.brand,
+    this.model,
+    this.rtspUrl,
+    this.streamPath,
     this.port = 554,
     this.tags = const [],
     this.status = 'ACTIVE',
@@ -148,6 +159,10 @@ class CctvRecord {
     String? ipAddress,
     String? username,
     String? password,
+    String? brand,
+    String? model,
+    String? rtspUrl,
+    String? streamPath,
     int? port,
     List<String>? tags,
     String? status,
@@ -161,6 +176,9 @@ class CctvRecord {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool clearDirection = false,
+    bool clearBrand = false,
+    bool clearModel = false,
+    bool clearRtspUrl = false,
   }) {
     return CctvRecord(
       id: id ?? this.id,
@@ -174,6 +192,10 @@ class CctvRecord {
       ipAddress: ipAddress ?? this.ipAddress,
       username: username ?? this.username,
       password: password ?? this.password,
+      brand: clearBrand ? null : (brand ?? this.brand),
+      model: clearModel ? null : (model ?? this.model),
+      rtspUrl: clearRtspUrl ? null : (rtspUrl ?? this.rtspUrl),
+      streamPath: streamPath ?? this.streamPath,
       port: port ?? this.port,
       tags: tags ?? this.tags,
       status: status ?? this.status,

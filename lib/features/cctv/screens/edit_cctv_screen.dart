@@ -29,6 +29,9 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
   late final TextEditingController _cctvIdController;
   late final TextEditingController _ipAddressController;
   late final TextEditingController _portController;
+  late final TextEditingController _brandController;
+  late final TextEditingController _modelController;
+  late final TextEditingController _rtspUrlController;
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
   late final TextEditingController _descriptionController;
@@ -61,6 +64,9 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
     _cctvIdController = TextEditingController();
     _ipAddressController = TextEditingController();
     _portController = TextEditingController();
+    _brandController = TextEditingController();
+    _modelController = TextEditingController();
+    _rtspUrlController = TextEditingController();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
     _descriptionController = TextEditingController();
@@ -74,6 +80,9 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
     _cctvIdController.dispose();
     _ipAddressController.dispose();
     _portController.dispose();
+    _brandController.dispose();
+    _modelController.dispose();
+    _rtspUrlController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _descriptionController.dispose();
@@ -89,6 +98,9 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
     _cctvIdController.text = record.cctvId;
     _ipAddressController.text = record.ipAddress ?? '';
     _portController.text = (record.port ?? 554).toString();
+    _brandController.text = record.brand ?? '';
+    _modelController.text = record.model ?? '';
+    _rtspUrlController.text = record.rtspUrl ?? '';
     _usernameController.text = record.username ?? '';
     _passwordController.text = record.password ?? '';
     _descriptionController.text = record.description ?? '';
@@ -174,6 +186,46 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
                 ),
                 keyboardType: TextInputType.url,
                 maxLength: 45,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _brandController,
+                decoration: const InputDecoration(
+                  labelText: 'Camera brand',
+                  hintText: 'Hikvision, Dahua, Blurams, ...',
+                  prefixIcon: Icon(Icons.business_outlined),
+                ),
+                textCapitalization: TextCapitalization.words,
+                maxLength: 64,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _modelController,
+                decoration: const InputDecoration(
+                  labelText: 'Camera model',
+                  prefixIcon: Icon(Icons.devices_other_outlined),
+                ),
+                maxLength: 120,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _rtspUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'RTSP URL (optional)',
+                  hintText: 'rtsp://camera-host:554/path',
+                  prefixIcon: Icon(Icons.link_outlined),
+                ),
+                keyboardType: TextInputType.url,
+                maxLength: 2048,
+                validator: (value) {
+                  final url = value?.trim() ?? '';
+                  if (url.isNotEmpty &&
+                      !RegExp(r'^rtsp://[^/]+', caseSensitive: false)
+                          .hasMatch(url)) {
+                    return 'Enter a valid RTSP URL';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -427,6 +479,15 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
               direction: _direction,
               ipAddress: _ipAddressController.text.trim(),
               port: int.tryParse(_portController.text.trim()) ?? 554,
+              brand: _brandController.text.trim().isEmpty
+                  ? null
+                  : _brandController.text.trim(),
+              model: _modelController.text.trim().isEmpty
+                  ? null
+                  : _modelController.text.trim(),
+              rtspUrl: _rtspUrlController.text.trim().isEmpty
+                  ? null
+                  : _rtspUrlController.text.trim(),
               username: _usernameController.text.trim(),
               password: _passwordController.text,
               tags: _tags,
@@ -434,6 +495,9 @@ class _EditCctvScreenState extends ConsumerState<EditCctvScreen> {
               type: _type,
               updatedAt: DateTime.now(),
               clearDirection: _direction == null,
+              clearBrand: _brandController.text.trim().isEmpty,
+              clearModel: _modelController.text.trim().isEmpty,
+              clearRtspUrl: _rtspUrlController.text.trim().isEmpty,
             ),
           );
       ref.read(cctvListProvider.notifier).load();

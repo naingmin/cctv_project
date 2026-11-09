@@ -15,6 +15,11 @@ void main() {
         'street': 'Main St',
         'direction': 'E',
         'ip_address': '192.168.1.25',
+        'rtsp_port': 8554,
+        'brand': 'Dahua',
+        'model': 'IPC-HDW',
+        'rtsp_url': 'rtsp://192.168.1.25/live',
+        'stream_path': 'cctv-record-1',
         'username': 'stream-user',
         'password': 'camera-secret',
         'tags': ['ALPRS', 'CPCS'],
@@ -37,6 +42,11 @@ void main() {
       expect(record.direction, 'E');
       expect(record.description, 'Intersection at Main St.');
       expect(record.ipAddress, '192.168.1.25');
+      expect(record.port, 8554);
+      expect(record.brand, 'Dahua');
+      expect(record.model, 'IPC-HDW');
+      expect(record.rtspUrl, 'rtsp://192.168.1.25/live');
+      expect(record.streamPath, 'cctv-record-1');
       expect(record.username, 'stream-user');
       expect(record.password, 'camera-secret');
       expect(record.tags, ['ALPRS', 'CPCS']);
@@ -55,6 +65,9 @@ void main() {
         township: 'Bahan',
         street: 'Main St',
         direction: 'E',
+        brand: 'Hikvision',
+        model: 'DS-2CD',
+        rtspUrl: 'rtsp://user:secret@camera/live',
         status: 'ACTIVE',
         createdAt: DateTime.parse('2024-01-01T00:00:00Z'),
         updatedAt: DateTime.parse('2024-01-01T00:00:00Z'),
@@ -69,6 +82,10 @@ void main() {
       expect(json['township'], 'Bahan');
       expect(json['street'], 'Main St');
       expect(json['direction'], 'E');
+      expect(json['brand'], 'Hikvision');
+      expect(json['model'], 'DS-2CD');
+      expect(json['rtsp_port'], 554);
+      expect(json.containsKey('rtsp_url'), isFalse);
       expect(json['status'], 'ACTIVE');
       expect(json.containsKey('ip_address'), isFalse);
       expect(json.containsKey('username'), isFalse);

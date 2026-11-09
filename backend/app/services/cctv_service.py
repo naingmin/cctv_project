@@ -6,7 +6,7 @@ import os
 import re
 from datetime import datetime, timezone
 from typing import Any, Optional
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit, urlunsplit
 
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -231,6 +231,9 @@ def serialize_cctv(doc: dict, *, include_credentials: bool = False) -> dict:
         "street": doc.get("street"),
         "direction": doc.get("direction"),
         "rtsp_port": doc.get("rtsp_port", 554),
+        "brand": doc.get("brand"),
+        "model": doc.get("model"),
+        "stream_path": stream_path(doc),
         "tags": doc.get("tags", []),
         "status": doc.get("status", "ACTIVE"),
         "last_checked": doc.get("last_checked"),
@@ -249,9 +252,53 @@ def serialize_cctv(doc: dict, *, include_credentials: bool = False) -> dict:
                 "ip_address": _decrypt_credential(doc.get("ip_address")),
                 "username": _decrypt_credential(doc.get("username")),
                 "password": _decrypt_credential(doc.get("password")),
+                "rtsp_url": _decrypt_credential(doc.get("rtsp_url")),
             }
         )
     return result
+
+
+def stream_path(doc: dict) -> str:
+    """Return a stable, server-generated MediaMTX path for this record."""
+    return f"cctv-{doc['_id']}"
+
+
+def rtsp_stream_url(doc: dict) -> Optional[str]:
+    """Resolve the camera source URL without exposing stored credentials."""
+    rtsp_url = _decrypt_credential(doc.get("rtsp_url"))
+    username = _decrypt_credential(doc.get("username"))
+    password = _decrypt_credential(doc.get("password"))
+
+    if rtsp_url:
+        parts = urlsplit(rtsp_url)
+        if parts.username is not None or not username:
+            return rtsp_url
+        credentials = quote(username, safe="")
+        if password:
+            credentials += f":{quote(password, safe='')}"
+        return urlunsplit(
+            (parts.scheme, f"{credentials}@{parts.netloc}", parts.path, parts.query, parts.fragment)
+        )
+
+    ip_address = _decrypt_credential(doc.get("ip_address"))
+    if not ip_address:
+        return None
+
+    brand = (doc.get("brand") or "").strip().casefold()
+    if brand and "hikvision" not in brand and "dahua" not in brand:
+        return None
+    path = (
+        "/cam/realmonitor?channel=1&subtype=0"
+        if "dahua" in brand
+        else "/Streaming/Channels/101"
+    )
+    authority = f"[{ip_address}]" if ":" in ip_address else ip_address
+    if username:
+        credentials = quote(username, safe="")
+        if password:
+            credentials += f":{quote(password, safe='')}"
+        authority = f"{credentials}@{authority}"
+    return f"rtsp://{authority}:{doc.get('rtsp_port', 554)}{path}"
 
 
 def serialize_marker(doc: dict) -> dict:
@@ -313,6 +360,9 @@ def create_cctv(db: Database, payload: CctvCreate, *, user: Any) -> dict:
         "direction": payload.direction,
         "ip_address": _encrypt_credential(payload.ip_address),
         "rtsp_port": payload.rtsp_port,
+        "brand": payload.brand,
+        "model": payload.model,
+        "rtsp_url": _encrypt_credential(payload.rtsp_url),
         "username": _encrypt_credential(payload.username),
         "password": _encrypt_credential(payload.password),
         "tags": payload.tags,
@@ -358,6 +408,9 @@ def update_cctv(
         "direction",
         "ip_address",
         "rtsp_port",
+        "brand",
+        "model",
+        "rtsp_url",
         "username",
         "password",
         "tags",
@@ -368,7 +421,7 @@ def update_cctv(
         if field in data:
             updates[field] = (
                 _encrypt_credential(data[field])
-                if field in {"ip_address", "username", "password"}
+                if field in {"ip_address", "rtsp_url", "username", "password"}
                 else data[field]
             )
     if "latitude" in data and "longitude" in data:
@@ -416,8 +469,6 @@ def verify_rtsp_connection(
     if not ip_address:
         return False
 
-    import cv2
-
     authority = f"[{ip_address}]" if ":" in ip_address else ip_address
     if username:
         credentials = quote(username, safe="")
@@ -425,6 +476,13 @@ def verify_rtsp_connection(
             credentials += f":{quote(password, safe='')}"
         authority = f"{credentials}@{authority}"
     rtsp_url = f"rtsp://{authority}:{rtsp_port or 554}/Streaming/Channels/101"
+    return verify_rtsp_url(rtsp_url)
+
+
+def verify_rtsp_url(rtsp_url: str) -> bool:
+    """Open an RTSP URL briefly and verify that it yields a video frame."""
+    import cv2
+
     capture = cv2.VideoCapture(
         rtsp_url,
         cv2.CAP_FFMPEG,
@@ -465,12 +523,18 @@ def test_connection(db: Database, cctv_id: str, *, user: Any) -> tuple[dict, boo
         )
     _check_cctv_access(user, doc, "update")
 
-    connected = verify_rtsp_connection(
-        _decrypt_credential(doc.get("ip_address")),
-        doc.get("rtsp_port", 554),
-        _decrypt_credential(doc.get("username")),
-        _decrypt_credential(doc.get("password")),
-    )
+    source_url = rtsp_stream_url(doc)
+    if doc.get("rtsp_url") or (
+        doc.get("brand") and "hikvision" not in doc["brand"].casefold()
+    ):
+        connected = bool(source_url and verify_rtsp_url(source_url))
+    else:
+        connected = verify_rtsp_connection(
+            _decrypt_credential(doc.get("ip_address")),
+            doc.get("rtsp_port", 554),
+            _decrypt_credential(doc.get("username")),
+            _decrypt_credential(doc.get("password")),
+        )
     checked_at = _now()
     status = "ACTIVE" if connected else "INACTIVE"
     result = db.cctvs.update_one(

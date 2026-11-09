@@ -24,12 +24,20 @@ also resolves that same file by path, so native runs do not depend on the
 current working directory. Do not commit the file or paste its contents into
 logs or support requests.
 
+When running FastAPI natively, start MediaMTX with
+`docker compose -f infrastructure/docker-compose.yml up -d mediamtx`; the
+control API is available only on host loopback at `http://localhost:9997`.
+The default WHEP/HLS URLs are for local clients. Set the public WebRTC host and
+playback URLs in `infrastructure/.env` for phones or remote clients.
+
 ```bash
-# 1. Start Mongo, MinIO, and the API
+# 1. Start Mongo, object storage, MediaMTX, and the API
 docker compose -f infrastructure/docker-compose.yml up -d --build
 
 # 2. API is at http://localhost:8000  (docs at /docs)
-# 3. Default admin (created only if the DB is empty):
+# 3. MediaMTX uses RTSP :8554, WHEP/WebRTC :8889, HLS :8888, and ICE
+#    :8189/udp + :8189/tcp. Its control API (:9997) is internal to Compose.
+# 4. Default admin (created only if the DB is empty):
 #    admin / DEFAULT_ADMIN_PASSWORD   <-- change immediately:
 #    python -m scripts.set_password admin
 ```
@@ -63,6 +71,10 @@ uvicorn app.main:app --reload
 - [ ] Rotate the default admin password; disable/remove unused seed accounts.
 - [ ] Configure `MINIO_PUBLIC_ENDPOINT` / MinIO proxy so presigned URLs reach
       mobile clients.
+- [ ] Set `MEDIAMTX_WHEP_BASE_URL` and `MEDIAMTX_HLS_BASE_URL` to client-
+      reachable HTTPS endpoints, and set `MEDIAMTX_WEBRTC_ADDITIONAL_HOSTS`
+      to the public MediaMTX IP/DNS name. Forward WebRTC ICE traffic on
+      `8189/udp` (and `8189/tcp` where UDP is unavailable).
 - [ ] Put MongoDB and MinIO on private networks; expose only the API.
 
 ## Topology
@@ -70,13 +82,19 @@ uvicorn app.main:app --reload
 ```
 Flutter ──HTTPS──► Reverse proxy ──► FastAPI (N replicas)
                                         │
-                     ┌──────────────────┴──────────────────┐
-                     ▼                                     ▼
-              MongoDB (replica set)               MinIO (distributed/VM)
+                     ├────► MongoDB (replica set)
+                     ├────► MinIO (distributed/VM)
+                     └────► MediaMTX (RTSP ingest / WHEP / HLS)
 ```
 
-The backend is stateless, so it scales horizontally. MongoDB and MinIO scale
-independently.
+The backend registers each camera's RTSP source with MediaMTX on demand. CCTV
+RTSP URLs and credentials are encrypted with `CCTV_CREDENTIALS_ENCRYPTION_KEY`.
+Only the authorized CCTV stream endpoint returns client playback URLs. WebRTC
+and HLS traffic then flows directly between the client and MediaMTX; configure
+the public URL and ICE host to match the deployment and reverse proxy.
+
+The backend is stateless, so it scales horizontally. MongoDB, MinIO, and
+MediaMTX scale independently.
 
 ## Backup
 

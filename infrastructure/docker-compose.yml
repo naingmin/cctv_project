@@ -62,6 +62,29 @@ services:
       timeout: 5s
       retries: 5
 
+  mediamtx:
+    image: bluenviron/mediamtx:1
+    container_name: cctv-mediamtx
+    restart: unless-stopped
+    ports:
+      - "8554:8554"
+      - "8889:8889"
+      - "8888:8888"
+      - "127.0.0.1:9997:9997"
+      - "8189:8189/udp"
+      - "8189:8189/tcp"
+    environment:
+      MTX_RTSPADDRESS: :8554
+      MTX_API: "yes"
+      MTX_APIADDRESS: :9997
+      MTX_HLS: "yes"
+      MTX_HLSADDRESS: :8888
+      MTX_WEBRTC: "yes"
+      MTX_WEBRTCADDRESS: :8889
+      MTX_WEBRTCADDITIONALHOSTS: ${MEDIAMTX_WEBRTC_ADDITIONAL_HOSTS:-localhost}
+      MTX_WEBRTCLOCALUDPADDRESS: :8189
+      MTX_WEBRTCLOCALTCPADDRESS: :8189
+
   backend:
     build:
       context: ../backend
@@ -73,6 +96,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      mediamtx:
+        condition: service_started
     ports:
       - "8000:8000"
     environment:
@@ -97,6 +122,9 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-cctv-media}
+      MEDIAMTX_API_URL: http://mediamtx:9997
+      MEDIAMTX_WHEP_BASE_URL: ${MEDIAMTX_WHEP_BASE_URL:-http://localhost:8889}
+      MEDIAMTX_HLS_BASE_URL: ${MEDIAMTX_HLS_BASE_URL:-http://localhost:8888}
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
       # Dev convenience: `flutter run -d chrome` picks a random port each run,
       # so allow any loopback port. config.py drops this in production.

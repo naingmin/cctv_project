@@ -20,6 +20,9 @@ class CctvFormState {
   final String? description;
   final String? ipAddress;
   final int port;
+  final String? brand;
+  final String? model;
+  final String? rtspUrl;
   final String? username;
   final String? password;
   final List<String> tags;
@@ -47,6 +50,9 @@ class CctvFormState {
     this.description,
     this.ipAddress,
     this.port = 554,
+    this.brand,
+    this.model,
+    this.rtspUrl,
     this.username,
     this.password,
     this.tags = const [],
@@ -75,6 +81,9 @@ class CctvFormState {
     String? description,
     String? ipAddress,
     int? port,
+    String? brand,
+    String? model,
+    String? rtspUrl,
     String? username,
     String? password,
     List<String>? tags,
@@ -104,6 +113,9 @@ class CctvFormState {
       description: description ?? this.description,
       ipAddress: ipAddress ?? this.ipAddress,
       port: port ?? this.port,
+      brand: brand ?? this.brand,
+      model: model ?? this.model,
+      rtspUrl: rtspUrl ?? this.rtspUrl,
       username: username ?? this.username,
       password: password ?? this.password,
       tags: tags ?? this.tags,
@@ -241,6 +253,15 @@ class CctvFormNotifier extends StateNotifier<CctvFormState> {
       case 'port':
         state = state.copyWith(port: int.tryParse(value.toString()) ?? 554);
         break;
+      case 'brand':
+        state = state.copyWith(brand: value);
+        break;
+      case 'model':
+        state = state.copyWith(model: value);
+        break;
+      case 'rtspUrl':
+        state = state.copyWith(rtspUrl: value);
+        break;
       case 'username':
         state = state.copyWith(username: value);
         break;
@@ -307,6 +328,9 @@ class CctvFormNotifier extends StateNotifier<CctvFormState> {
         direction: state.direction,
         ipAddress: state.ipAddress,
         port: state.port,
+        brand: state.brand,
+        model: state.model,
+        rtspUrl: state.rtspUrl,
         username: state.username,
         password: state.password,
         tags: state.tags,

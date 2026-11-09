@@ -28,6 +28,9 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
   final _cctvIdController = TextEditingController();
   final _ipAddressController = TextEditingController();
   final _portController = TextEditingController(text: '554');
+  final _brandController = TextEditingController();
+  final _modelController = TextEditingController();
+  final _rtspUrlController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -49,6 +52,9 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
     _cctvIdController.dispose();
     _ipAddressController.dispose();
     _portController.dispose();
+    _brandController.dispose();
+    _modelController.dispose();
+    _rtspUrlController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _descriptionController.dispose();
@@ -130,6 +136,9 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
     notifier.updateField('cctvId', _cctvIdController.text.trim());
     notifier.updateField('ipAddress', _ipAddressController.text.trim());
     notifier.updateField('port', _portController.text.trim());
+    notifier.updateField('brand', _brandController.text.trim());
+    notifier.updateField('model', _modelController.text.trim());
+    notifier.updateField('rtspUrl', _rtspUrlController.text.trim());
     notifier.updateField('username', _usernameController.text.trim());
     notifier.updateField('password', _passwordController.text);
     notifier.updateField('description', _descriptionController.text.trim());
@@ -192,6 +201,46 @@ class _AddCctvScreenState extends ConsumerState<AddCctvScreen> {
                   prefixIcon: Icon(Icons.lan_outlined),
                 ),
                 keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _brandController,
+                decoration: const InputDecoration(
+                  labelText: 'Camera brand',
+                  hintText: 'Hikvision, Dahua, Blurams, ...',
+                  prefixIcon: Icon(Icons.business_outlined),
+                ),
+                textCapitalization: TextCapitalization.words,
+                maxLength: 64,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _modelController,
+                decoration: const InputDecoration(
+                  labelText: 'Camera model',
+                  prefixIcon: Icon(Icons.devices_other_outlined),
+                ),
+                maxLength: 120,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _rtspUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'RTSP URL (optional)',
+                  hintText: 'rtsp://camera-host:554/path',
+                  prefixIcon: Icon(Icons.link_outlined),
+                ),
+                keyboardType: TextInputType.url,
+                maxLength: 2048,
+                validator: (value) {
+                  final url = value?.trim() ?? '';
+                  if (url.isNotEmpty &&
+                      !RegExp(r'^rtsp://[^/]+', caseSensitive: false)
+                          .hasMatch(url)) {
+                    return 'Enter a valid RTSP URL';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(

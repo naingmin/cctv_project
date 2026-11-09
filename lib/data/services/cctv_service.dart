@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/network/api_client.dart';
 import '../models/cctv_record_model.dart';
+import '../models/cctv_stream_model.dart';
 import '../models/map_bounds.dart';
 import '../models/paginated_response.dart';
 
@@ -76,6 +77,13 @@ class CctvService {
   Future<CctvRecord> getCctvById(String id) async {
     final response = await _api.get('/cctvs/$id');
     return CctvRecord.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
+  Future<CctvStreamEndpoints> getStreamEndpoints(String id) async {
+    final response = await _api.get('/cctvs/$id/stream');
+    return CctvStreamEndpoints.fromJson(
+      response['data'] as Map<String, dynamic>,
+    );
   }
 
   Future<CctvRecord> createCctv(CctvRecord record) async {
@@ -230,7 +238,10 @@ class CctvService {
       'street': r.street,
       'direction': r.direction,
       'ip_address': r.ipAddress,
-      'port': r.port,
+      'rtsp_port': r.port,
+      'brand': r.brand,
+      'model': r.model,
+      'rtsp_url': r.rtspUrl,
       'username': r.username,
       'password': r.password,
       'tags': r.tags,
