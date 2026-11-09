@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import os
 import re
+import socket
 from datetime import datetime, timezone
 from typing import Any, Optional
 from urllib.parse import quote, urlsplit, urlunsplit
@@ -11,8 +12,13 @@ from urllib.parse import quote, urlsplit, urlunsplit
 from bson import ObjectId
 from bson.errors import InvalidId
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from onvif import ONVIFCamera
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
+import requests
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import Timeout as RequestsTimeout
+from zeep.exceptions import Fault, TransportError
 
 from app.config import settings
 from app.core.errors import (
@@ -28,6 +34,113 @@ from app.services import storage_service
 
 def _now() -> datetime:
     return datetime.now(tz=timezone.utc)
+
+
+class ONVIFDiscoveryError(Exception):
+    """Base error for a failed ONVIF connection or stream lookup."""
+
+
+class ONVIFAuthenticationError(ONVIFDiscoveryError):
+    """The camera rejected the supplied credentials."""
+
+
+class ONVIFTimeoutError(ONVIFDiscoveryError):
+    """The camera did not respond before the configured timeout."""
+
+
+def discover_onvif_rtsp_url(
+    ip: str,
+    port: int,
+    username: str,
+    password: str,
+    *,
+    timeout: float = 5.0,
+) -> str:
+    """Return the first RTSP URI exposed by a camera's ONVIF media profiles."""
+    from zeep.transports import Transport
+
+    session = requests.Session()
+    try:
+        session.trust_env = False
+        transport = Transport(
+            timeout=timeout, operation_timeout=timeout, session=session
+        )
+        proxy_variables = ("http_proxy", "https_proxy")
+        proxy_values = {name: os.environ.get(name) for name in proxy_variables}
+        try:
+            # onvif-zeep removes these process-wide variables during initialization.
+            camera = ONVIFCamera(
+                ip, port, username, password, transport=transport
+            )
+        finally:
+            for name, value in proxy_values.items():
+                if value is not None:
+                    os.environ[name] = value
+                else:
+                    os.environ.pop(name, None)
+        media_service = camera.create_media_service()
+        profiles = media_service.GetProfiles()
+        if not profiles:
+            raise ONVIFDiscoveryError("The camera has no video profiles.")
+
+        for profile in profiles:
+            response = media_service.GetStreamUri(
+                {
+                    "StreamSetup": {
+                        "Stream": "RTP-Unicast",
+                        "Transport": {"Protocol": "RTSP"},
+                    },
+                    "ProfileToken": profile.token,
+                }
+            )
+            uri = getattr(response, "Uri", None)
+            if uri:
+                return uri
+        raise ONVIFDiscoveryError(
+            "The camera did not return an RTSP stream URI."
+        )
+    except (RequestsTimeout, socket.timeout, TimeoutError) as exc:
+        raise ONVIFTimeoutError("The camera did not respond in time.") from exc
+    except Fault as exc:
+        fault_text = " ".join(
+            str(value)
+            for value in (exc, getattr(exc, "code", ""), getattr(exc, "message", ""))
+        ).lower()
+        if any(
+            marker in fault_text
+            for marker in (
+                "notauthorized",
+                "unauthorized",
+                "invalidsecurity",
+                "authentication",
+                "401",
+                "403",
+            )
+        ):
+            raise ONVIFAuthenticationError(
+                "The camera rejected the supplied credentials."
+            ) from exc
+        raise ONVIFDiscoveryError(
+            "The camera rejected the ONVIF request."
+        ) from exc
+    except TransportError as exc:
+        if getattr(exc, "status_code", None) in (401, 403):
+            raise ONVIFAuthenticationError(
+                "The camera rejected the supplied credentials."
+            ) from exc
+        if "timeout" in str(exc).lower() or "timed out" in str(exc).lower():
+            raise ONVIFTimeoutError(
+                "The camera did not respond in time."
+            ) from exc
+        raise ONVIFDiscoveryError(
+            "Could not communicate with the camera's ONVIF service."
+        ) from exc
+    except RequestsConnectionError as exc:
+        raise ONVIFDiscoveryError(
+            "Could not connect to the camera's ONVIF service."
+        ) from exc
+    finally:
+        session.close()
 
 
 # ---------------------------------------------------------------------------
